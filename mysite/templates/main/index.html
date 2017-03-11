@@ -1,0 +1,106 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title> Main landing page </title>
+
+		<!-- JQuery -->
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+		<!-- Bootstrap -->
+		<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+		<!-- Font Awesome icons -->
+		<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+		<!-- Nivo slider -->
+		<link rel="stylesheet" href="{% static 'nivo-slider.css' %}" type="text/css">
+		<script src="{% static 'jquery.nivo.slider.pack.js' %}" type="text/javascript"></script>
+
+		<!-- Include the javascript and CSS files -->
+		<script src="{% static 'main/main.js' %}" type="text/javascript"></script>
+		<link rel="stylesheet" href="{% static 'main/main.css' %}" type="text/css">
+	</head>
+	<body>
+		<button id="mainLoginButton" type="button" class="btn btn-primary" data-toggle="modal" data-target="#loginModal">
+			Log in
+		</button>
+
+		<div id="mainContainer">
+
+			<div id="mainScrollImage" class="nivoSlider">
+				<img src="https://i2.wp.com/thebudgetboy.com/wp-content/uploads/2016/12/7-life-lessons-trading-stocks-teaches.png?fit=1926%2C600">
+				<img src="http://www.newrulesofinvesting.com/wp-content/uploads/2016/09/stocks.jpg">
+			</div>
+
+			<div id="mainFeatures" class="row">
+				<div id="mainFeatureRealtime" class="roundButtonContainer col-xs-3">
+					<!-- TODO: use jquery to calculate the proper size of the font + button -->
+					<div class="roundButtonDiv">
+						<a href="/realtime" class="roundButtonLink">
+							<i class="roundButtonIcon glyphicon glyphicon-time"></i>
+						</a>
+					</div>
+					<p style="block"> Realtime </p>
+				</div>
+				<div id="mainFeatureVisualization" class="roundButtonContainer col-xs-3">
+					<div class="roundButtonDiv">
+						<a href="/visualization" class="roundButtonLink">
+							<i class="roundButtonIcon fa fa-bar-chart"></i>
+						</a>
+					</div>
+					<p style="block"> Data Visualization </p>
+				</div>
+				<div id="mainFeaturePrediction" class="roundButtonContainer col-xs-3">
+					<div class="roundButtonDiv">
+						<a href="/predictive" class="roundButtonLink">
+							<i class="roundButtonIcon fa fa-line-chart"></i>
+						</a>
+					</div>
+					<p style="block"> Predictive Analysis </p>
+				</div>
+				<div id="mainFeatureAPI" class="roundButtonContainer col-xs-3">
+					<div class="roundButtonDiv">
+						<a href="/api" class="roundButtonLink">
+							<i class="roundButtonIcon fa fa-code"></i>
+						</a>
+					</div>
+					<p style="block"> API </p>
+				</div>
+			</div>
+
+			<div id="mainInfo" class="row">
+				<div class="col-xs-12">
+					Copyright SQL Injection - 2017
+				</div>
+			</div>
+
+		</div>
+
+
+		<!-- Log-in modal -->
+		<div id="loginModal" class="modal fade" role="dialog" style="display: none;">
+			<div id="loginModalDialog" class="modal-dialog">
+				<div class="modal-header">
+					Login modal
+				</div>
+				<div class="modal-body">
+					<div class="form-group">
+						<label id="usernameLabel" for="username"> Username: </label>
+						<input type="text" id="username" class="form-control">
+					</div>
+					<div class="form-group">
+						<label for="password"> Password: </label>
+						<input type="password" id="password" class="form-control">
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button class="btn btn-primary"> Submit </button>
+				</div>
+			</div>
+		</div>
+
+	</body>
+</html>
