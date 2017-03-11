@@ -1,0 +1,55 @@
+#mainLoginButton {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 10;
+}
+
+#mainContainer {
+  padding: 15px;
+}
+
+#mainFeatures {
+  margin: 20px 0px;
+}
+
+.roundButtonContainer {
+  text-align: center;
+}
+
+.roundButtonDiv {
+  display: inline-block;
+  width: 100px;
+  height: 100px;
+}
+
+.roundButtonLink {
+  display: block;
+  width: 100px;
+  height: 100px;
+  text-align:center;
+  font-size: 12px;
+  border-radius: 50%;
+  color:white;
+  background:black;
+  line-height:50px;
+}
+
+.roundButtonIcon {
+  position: relative;
+  top: 25%;
+  font-size: 50px;
+}
+
+#mainInfo {
+  padding-bottom: 10px;
+}
+
+#mainInfo div {
+  text-align: center;
+}
+
+/* Login modal */
+#loginModalDialog {
+  background-color: white;
+}
