@@ -20,3 +20,4 @@ class Data(models.Model):
 			cur.execute("SELECT * FROM DATA WHERE id = %s", key)
 	
 
+

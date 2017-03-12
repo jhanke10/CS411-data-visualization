@@ -20,7 +20,7 @@ from rest_framework import routers
 from project import views as projectViews
 
 router = routers.DefaultRouter()
-router.register(r'data', projectViews.DataViewSet)
+router.register(r'api', projectViews.DataViewSet)
 
 urlpatterns = [
   url(r'^admin/', admin.site.urls),
@@ -29,7 +29,6 @@ urlpatterns = [
   url(r'^realtime/', projectViews.realtime),
   url(r'^visualization/', projectViews.visualization),
   url(r'^predictive/', projectViews.predictive),
-  url(r'^api/', projectViews.api),
   url(r'^', include(router.urls)),
   url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]
