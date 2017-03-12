@@ -15,3 +15,8 @@ class Data(models.Model):
 		with connection.cursor() as cur:
 			cur.execute("DELETE FROM DATA WHERE source = %s, value = %s;", self.source, self.value)
 
+	def searchData(key):
+		with connection.cursor() as cur:
+			cur.execute("SELECT * FROM DATA WHERE id = %s", key)
+	
+
