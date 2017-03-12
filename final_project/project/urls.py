@@ -17,11 +17,5 @@ from django.conf.urls import include, url
 
 from . import views
 
-urlpatterns = [
-  url(r'^$', views.index, name='index'),
-  url(r'^main/', views.index, name='index'),
-  url(r'^realtime/', views.realtime),
-  url(r'^visualization/', views.visualization),
-  url(r'^predictive/', views.predictive),
-  url(r'^api/', views.api),
-]
+#All urls are imported in final_project/urls.py
+urlpatterns = []

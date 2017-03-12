@@ -16,12 +16,14 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 
+from project import views as projectViews
+
 urlpatterns = [
   url(r'^admin/', admin.site.urls),
-  url(r'^$', include('project.urls')),
-  url(r'^main/', include('project.urls')),
-  url(r'^realtime/', include('project.urls')),
-  url(r'^visualization/', include('project.urls')),
-  url(r'^predictive/', include('project.urls')),
-  url(r'^api/', include('project.urls')),
+  url(r'^$', projectViews.index, name='index'),
+  url(r'^main/', projectViews.index, name='index'),
+  url(r'^realtime/', projectViews.realtime),
+  url(r'^visualization/', projectViews.visualization),
+  url(r'^predictive/', projectViews.predictive),
+  url(r'^api/', projectViews.api),
 ]
