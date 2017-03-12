@@ -1,5 +1,8 @@
 from __future__ import unicode_literals
 
-from django.db import models
+from django.db import models, connection
 
-# Create your models here.
+class Data(models.Model):
+	category = models.CharField(max_length = 200)
+	value = models.IntegerField(default = 0)
+	source = models.CharField(max_length = 200)
