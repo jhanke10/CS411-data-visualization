@@ -25,7 +25,7 @@ SECRET_KEY = 's0=i4z07=k#95vvdzfebad=ch9c0zwq1%aa#f121$b=e_p&^9w'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = [u'0.0.0.0', 'yourappname.herokuapp.com']
+ALLOWED_HOSTS = [u'0.0.0.0', u'sqlinjections.herokuapp.com', u'127.0.0.1']
 
 
 # Application definition
