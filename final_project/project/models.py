@@ -19,3 +19,6 @@ class Data(models.Model):
 	def searchData(key):
 		with connection.cursor() as cur:
 			cur.execute("SELECT * FROM DATA WHERE id = %s", key)
+
+	def updateData(self):
+		return 0
