@@ -1,88 +1,104 @@
-//TODO: store this using environment variables
-var username = "admin";
-var password = "password123";
-
 window.onload = function(e) {
-  console.log("Added data via code!");
-  $("#realtimeDataTable").append("<tr> <td>Foo</td> <td>2</td> <td>jQuery</td ></tr>");
-  addDataRow("Temperature", 89, "code");
 
-  //getData();
-  postData("Temperature", 89, "jQuery");
-}
+  $("#importForm").hide();
+  $("#insertForm").hide();
 
-function addDataRow(type, value, source) {
-  var html = "<tr> <td>" + type + "</td> <td>" + value + "</td> <td>" + source + "</td ></tr>"
-  $("#realtimeDataTable").append(html);
-}
-
-// We need to have cookie management stuff for post requests
-var csrftoken = $.cookie('csrftoken');
-
-function csrfSafeMethod(method) {
-    // these HTTP methods do not require CSRF protection
-    return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-}
-
-$.ajaxSetup({
-    beforeSend: function(xhr, settings) {
-        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-            xhr.setRequestHeader("X-CSRFToken", csrftoken);
-        }
+  getAllData(function(data) {
+    for(var i = 0; i < data.results.length; i++) {
+      addDataRow(data.results[i].category, data.results[i].value, data.results[i].source, false);
     }
-});
-// End setup for cookie management
-
-/**
- * Async function that wraps a get request
- * @param  {function} whenDone A callback function called when the get request finishes
- */
-function getData(whenDone) {
-  $.ajax({
-    type: "GET",
-    url: "/api/?format=json",
-    dataType: "json",
-    username: username,
-    password: password,
-    /*
-    success: function(data, status) {
-      console.log("Finished get request. Response:");
-      console.log(JSON.stringify(data));
-      console.log(status);
-      console.log("End get response.");
-      return data;
-    }*/
-    success: whenDone
-  })
+  });
 }
 
-/**
- * Async function that wraps a post request
- * @param  {String} type   The category of the data
- * @param  {Integer} value  The value
- * @param  {String} source Where this data originated from
- * @param  {function} whenDone A callback function called when the post request finishes
- */
-function postData(type, value, source, whenDone) {
+function submitInsertForm() {
+  var type = $("#insertType").val();
+  var value = $("#insertValue").val();
+  var source = $("#insertSource").val();
 
-  var dat = '{ "category": "' + type + '", "value": ' + value + ', "source": "' + source + '" }'
-  console.log("Trying to post data: '" + dat + "'")
+  var failed = false;
 
-  $.ajax({
-    type: "POST",
-    url: "/api/?format=api",
-    username: username,
-    password: password,
-    data: dat,
-    contentType: "application/json",
-    /*
-    success: function(data, status) {
-      console.log("Finished a post request. Response: ");
-      console.log(JSON.stringify(data));
-      console.log(status);
-      console.log("End post response.");
-      return data;
-    }*/
-    success: whenDone
-  });
+  if(type === "") {
+    $("#insertType").attr("style", "border: 1px solid darkred");
+    failed = true;
+  } else {
+    $("#insertType").removeAttr("style");
+  }
+
+  if(value === "" || isNaN(value)) {
+    $("#insertValue").attr("style", "border: 1px solid darkred");
+    failed = true;
+  } else {
+    $("#insertValue").removeAttr("style");
+    value = parseInt(value);
+  }
+
+  if(source === "") {
+    $("#insertSource").attr("style", "border: 1px solid darkred; border-right: 2px solid darkred;");
+    failed = true;
+  } else {
+    $("#insertSource").removeAttr("style");
+  }
+
+  if(!failed) {
+    $("#insertType").val("");
+    $("#insertValue").val("");
+    $("#insertSource").val("");
+
+    postData(type, value, source, function(data, success) {
+      addDataRow(type, value, source);
+    })
+  }
+}
+
+function addDataRow(type, value, source, prepend=true) {
+  var html = $("<tr> <td>" + type + "</td> <td>" + value + "</td> <td>" + source + "</td ></tr>")
+    .on("click", function(event) {
+      var row = $(this);
+
+      if ((event.ctrlKey || event.metaKey) || event.shiftKey) {
+        row.addClass("highlight");
+      } else {
+        $("#realtimeDataTable tr").removeClass("highlight");
+        row.addClass("highlight");
+      }
+    })
+    .on("selectstart dragstart", function(event) {
+      event.preventDefault(); return false;
+    })
+    .on("dblclick", function(event) {
+      var ref = $(this);
+
+      if(ref.hasClass("editing")) {
+        return false;
+      } else {
+        ref.addClass("editing");
+      }
+
+      $(document).on("click", function(event) {
+
+        if(!$.contains(ref[0], event.target)) {
+          var entries = ref.find("td input");
+          for(let i = 0; i < entries.length; i++) {
+            var vl = $(entries[i]).val();
+            if(vl === "") vl = $(entries[i]).attr("placeholder");
+            $(entries[i]).parent().replaceWith('<td>' + vl + '</td>');
+            //TODO: CALL PUT() request
+          }
+          $(document).off("click");
+          ref.removeClass("editing");
+        }
+      });
+
+      var entries = ref.find("td");
+      for(let i = 0; i < entries.length; i++) {
+        var vl = entries[i].innerHTML;
+        $(entries[i]).replaceWith('<td><input type="text" placeholder="' + vl + '"></td>');
+      }
+    });
+
+  if(prepend) {
+    $("#realtimeDataTable").prepend(html);
+  } else {
+    $("#realtimeDataTable").append(html);
+  }
 }
