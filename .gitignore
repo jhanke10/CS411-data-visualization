@@ -1,0 +1,6 @@
+
+final_project/freeze.txt
+
+*.pyc
+
+final_project/final_project/urls.pyc
