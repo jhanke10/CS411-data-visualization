@@ -27,6 +27,8 @@ urlpatterns = [
   url(r'^$', projectViews.index, name='index'),
   url(r'^main/', projectViews.index, name='index'),
   url(r'^realtime/', projectViews.realtime),
+  # url(r'^realtime/list/$', projectViews.data_list, name='data_list'),
+  # url(r'^realtime/edit/(?P<pk>[0-9]+)$', projectViews.data_detail, name='data_detail'),
   url(r'^visualization/', projectViews.visualization),
   url(r'^predictive/', projectViews.predictive),
   url(r'^', include(router.urls)),
