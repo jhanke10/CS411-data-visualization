@@ -62,7 +62,7 @@ def predictive(request):
 #     Get, udpate, or delete a specific data
 #     """
 #     try:
-#         data = Data.objects.raw('SELECT * FROM project_data WHERE time = %s', [pk])
+#         data = Data.objects.raw('SELECT * FROM project_data WHERE ID = %s', [pk])
 #     except Data.DoesNotExist:
 #         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -77,7 +77,7 @@ def predictive(request):
 #             stream = BytesIO(content)
 #             data = JSONParser().parse(stream)
 #             with connection.cursor() as cur:
-#                 cur.execute('UPDATE project_data SET category = %s, value = %s, source = %s, time = %s WHERE id = %s', [str(data['category']), int(data['value']), str(data['source']), str(data['time']), pk])
+#                 cur.execute('UPDATE project_data SET category = %s, value = %s, source = %s, time = %s WHERE ID = %s', [str(data['category']), int(data['value']), str(data['source']), str(data['time']), pk])
 #             # serializer.save()
 #             # data = Data.objects.raw('SELECT * FROM data_data')
 #         	# serializer = DataSerializer(data, many=True)
