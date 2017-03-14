@@ -15,29 +15,15 @@ function submitInsertForm() {
   var value = $("#insertValue").val();
   var source = $("#insertSource").val();
 
-  var failed = false;
-
-  if(type === "") {
-    $("#insertType").attr("style", "border: 1px solid darkred");
-    failed = true;
-  } else {
-    $("#insertType").removeAttr("style");
+  function setFail(name, to) {
+    to ? $(name).attr("style", "border: 1px solid darkred") : $(name).removeAttr("style");
+    return to;
   }
 
-  if(value === "" || isNaN(value)) {
-    $("#insertValue").attr("style", "border: 1px solid darkred");
-    failed = true;
-  } else {
-    $("#insertValue").removeAttr("style");
-    value = parseInt(value);
-  }
-
-  if(source === "") {
-    $("#insertSource").attr("style", "border: 1px solid darkred; border-right: 2px solid darkred;");
-    failed = true;
-  } else {
-    $("#insertSource").removeAttr("style");
-  }
+  var failed =
+    setFail("insertType", type === "") ||
+    setFail("insertValue", value === "" || isNaN(value)) ||
+    setFail("insertSource", source === "");
 
   if(!failed) {
     $("#insertType").val("");
@@ -95,6 +81,10 @@ function addDataRow(type, value, source, prepend=true) {
         $(entries[i]).replaceWith('<td><input type="text" placeholder="' + vl + '"></td>');
       }
     });
+
+    //Delete button with each row:
+    //Set position of <tr> to relative first, then add
+    //<button type="button" class="btn btn-danger" style="position: absolute; height: calc(100% - 4px); margin: 2px; right: 0px;">X</button>
 
   if(prepend) {
     $("#realtimeDataTable").prepend(html);
