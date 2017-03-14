@@ -16,4 +16,4 @@ from rest_framework import serializers
 class DataSerializer(serializers.HyperlinkedModelSerializer):
 	class Meta:
 		model = Data
-		fields = ('category', 'value', 'source')
+		fields = ('category', 'value', 'source', 'time')
