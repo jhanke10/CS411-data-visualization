@@ -4,6 +4,13 @@ from project.models import Data
 from rest_framework import viewsets
 from final_project.serializers import DataSerializer
 
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from rest_framework.renderers import JSONRenderer
+from rest_framework.parsers import JSONParser
+from django.utils.six import BytesIO
+
 def index(request):
 	return render(
 		request,
@@ -20,23 +27,68 @@ def visualization(request):
 def predictive(request):
 	return render(request, "predictive/index.html", context={}, )
 
-def api(request):
-	return render(request, "api/index.html", context={}, )
+# def api(request):
+# 	return render(request, "api/index.html", context={}, )
 
-# class UserViewSet(viewsets.ModelViewSet):
+# @api_view(['GET', 'POST'])
+# def data_list(request):
 #     """
-#     API endpoint that allows users to be viewed or edited.
+#     List all tasks, or create a new data.
 #     """
-#     queryset = User.objects.all().order_by('-date_joined')
-#     serializer_class = UserSerializer
+#     if request.method == 'GET':
+#         data = Data.objects.raw('SELECT * FROM project_data')
+#         serializer = DataSerializer(data, many=True)
+#         return Response(serializer.data)
 
+#     elif request.method == 'POST':
+#         serializer = DataSerializer(data=request.data)
+#         if serializer.is_valid():
+#             content = JSONRenderer().render(serializer.data)
+#             stream = BytesIO(content)
+#             data = JSONParser().parse(stream)
+#             with connection.cursor() as cur:
+#                 cur.execute('INSERT INTO project_data (category, value, source, time) VALUES (%s, %s, %s, %s);', [str(data['category']), int(data['value']), str(data['source']), datetime.now()])
+#             # serializer.save()
+#             # data = Data.objects.raw('SELECT * FROM project_data')
+#         	# serializer = DataSerializer(data, many=True)
+#         	return Response(serializer.data)
+#         else:
+#             return Response(
+#                 serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-# class GroupViewSet(viewsets.ModelViewSet):
+# @api_view(['GET', 'PUT', 'DELETE'])
+# def data_detail(request, pk):
 #     """
-#     API endpoint that allows groups to be viewed or edited.
+#     Get, udpate, or delete a specific data
 #     """
-#     queryset = Group.objects.all()
-#     serializer_class = GroupSerializer
+#     try:
+#         data = Data.objects.raw('SELECT * FROM project_data WHERE time = %s', [pk])
+#     except Data.DoesNotExist:
+#         return Response(status=status.HTTP_404_NOT_FOUND)
+
+#     if request.method == 'GET':
+#         serializer = DataSerializer(data)
+#         return Response(serializer.data)
+
+#     elif request.method == 'PUT':
+#         serializer = DataSerializer(data, data=request.data)
+#         if serializer.is_valid():
+#             content = JSONRenderer().render(serializer.data)
+#             stream = BytesIO(content)
+#             data = JSONParser().parse(stream)
+#             with connection.cursor() as cur:
+#                 cur.execute('UPDATE project_data SET category = %s, value = %s, source = %s, time = %s WHERE id = %s', [str(data['category']), int(data['value']), str(data['source']), str(data['time']), pk])
+#             # serializer.save()
+#             # data = Data.objects.raw('SELECT * FROM data_data')
+#         	# serializer = DataSerializer(data, many=True)
+#         	return Response(serializer.data)
+#         else:
+#             return Response(
+#                 serilizer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+#     elif request.method == 'DELETE':
+#         data.deleteData()
+#         return Response(status=status.HTTP_204_NO_CONTENT)
 
 class DataViewSet(viewsets.ModelViewSet):
 	queryset = Data.objects.all()
