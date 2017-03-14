@@ -8,7 +8,7 @@ class Data(models.Model):
 	category = models.CharField(max_length = 200)
 	value = models.IntegerField(default = 0)
 	source = models.CharField(max_length = 200)
-	time = models.DateTimeField(default=timezone.now, primary_key = True)
+	time = models.DateTimeField(default=timezone.now)
 
 	def addData(self, data):
 		with connection.cursor() as cur:
