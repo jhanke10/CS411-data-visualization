@@ -9,6 +9,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
+from rest_framework import generics
 from django.utils.six import BytesIO
 from datetime import datetime
 
@@ -91,6 +92,15 @@ def predictive(request):
 #         data.deleteData()
 #         return Response(status=status.HTTP_204_NO_CONTENT)
 
-class DataViewSet(viewsets.ModelViewSet):
+class DataList(generics.ListCreateAPIView):
 	queryset = Data.objects.all()
 	serializer_class = DataSerializer
+
+class DataDetail(generics.RetrieveUpdateDestroyAPIView):
+	queryset = Data.objects.all()
+	serializer_class = DataSerializer
+
+
+# class DataViewSet(viewsets.ModelViewSet):
+# 	queryset = Data.objects.all()
+# 	serializer_class = DataSerializer
