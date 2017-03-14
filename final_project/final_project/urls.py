@@ -16,11 +16,12 @@ Including another URLconf
 from django.conf.urls import include, url
 from django.contrib import admin
 from rest_framework import routers
+from rest_framework.urlpatterns import format_suffix_patterns
 
 from project import views as projectViews
 
-router = routers.DefaultRouter()
-router.register(r'api', projectViews.DataViewSet)
+# router = routers.DefaultRouter()
+# router.register(r'api', projectViews.DataViewSet)
 
 urlpatterns = [
   url(r'^admin/', admin.site.urls),
@@ -31,6 +32,10 @@ urlpatterns = [
   # url(r'^realtime/edit/(?P<pk>[0-9]+)$', projectViews.data_detail, name='data_detail'),
   url(r'^visualization/', projectViews.visualization),
   url(r'^predictive/', projectViews.predictive),
-  url(r'^', include(router.urls)),
+  # url(r'^', include(router.urls)),
+  url(r'^api/$', projectViews.DataList.as_view()),
+  url(r'^api/(?P<pk>[0-9]+)/$', projectViews.DataDetail.as_view()),
   url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]
+
+urlpatterns = format_suffix_patterns(urlpatterns)
