@@ -29,6 +29,9 @@ def visualization(request):
 def predictive(request):
 	return render(request, "predictive/index.html", context={}, )
 
+def search(request):
+	return render(request, "search/index.html", context={}, )
+
 # def api(request):
 # 	return render(request, "api/index.html", context={}, )
 

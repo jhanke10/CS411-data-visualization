@@ -32,6 +32,7 @@ urlpatterns = [
   # url(r'^realtime/edit/(?P<pk>[0-9]+)$', projectViews.data_detail, name='data_detail'),
   url(r'^visualization/', projectViews.visualization),
   url(r'^predictive/', projectViews.predictive),
+  url(r'^search/', projectViews.search),
   # url(r'^', include(router.urls)),
   url(r'^api/$', projectViews.DataList.as_view()),
   url(r'^api/(?P<pk>[0-9]+)/$', projectViews.DataDetail.as_view()),
