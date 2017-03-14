@@ -2,7 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from project.models import Data
 from rest_framework import viewsets
-from final_project.serializers import DataSerializer
+from .serializers import DataSerializer
 
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -10,6 +10,7 @@ from rest_framework.response import Response
 from rest_framework.renderers import JSONRenderer
 from rest_framework.parsers import JSONParser
 from django.utils.six import BytesIO
+from datetime import datetime
 
 def index(request):
 	return render(
@@ -62,7 +63,7 @@ def predictive(request):
 #     Get, udpate, or delete a specific data
 #     """
 #     try:
-#         data = Data.objects.raw('SELECT * FROM project_data WHERE ID = %s', [pk])
+#         data = Data.objects.raw('SELECT * FROM project_data WHERE id = %s', [pk])
 #     except Data.DoesNotExist:
 #         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -77,7 +78,7 @@ def predictive(request):
 #             stream = BytesIO(content)
 #             data = JSONParser().parse(stream)
 #             with connection.cursor() as cur:
-#                 cur.execute('UPDATE project_data SET category = %s, value = %s, source = %s, time = %s WHERE ID = %s', [str(data['category']), int(data['value']), str(data['source']), str(data['time']), pk])
+#                 cur.execute('UPDATE project_data SET category = %s, value = %s, source = %s, time = %s WHERE id = %s', [str(data['category']), int(data['value']), str(data['source']), datetime.datetime.strptime(str(data['time']), "%Y-%m-%dT%H:%M:%S.%f"), pk])
 #             # serializer.save()
 #             # data = Data.objects.raw('SELECT * FROM data_data')
 #         	# serializer = DataSerializer(data, many=True)
