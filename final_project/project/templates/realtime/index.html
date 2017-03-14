@@ -31,7 +31,6 @@
 
 				<ul class="nav nav-pills nav-stacked">
 					<li class="active"><a href="#"> Data </a></li>
-					<li><a href="/search"> Search </a></li>
 					<li><a href="/visualization"> Visualization </a></li>
 					<li><a href="/predictive"> Predictive </a></li>
 					<li><a href="/api"> API </a></li>
@@ -46,7 +45,8 @@
 					<button class="btn btn-primary" type="button" onclick="$('#importForm').toggle('slow');"> Import </button>
 					<button class="btn btn-success" type="button" onclick="$('#insertForm').toggle('slow');"> Insert </button>
 					<button class="btn btn-info" type="button"> Update </button>
-					<button class="btn btn-danger" type="button"> Delete </button>
+					<button class="btn btn-warning" type="button" onclick="$('#searchForm').toggle('slow');"> Search </button>
+					<button class="btn btn-danger" type="button" onclick="deleteSelected();"> Delete </button>
 				</div>
 
 				<div id="importForm" style="padding-top: 15px;">
@@ -81,14 +81,21 @@
 					</div>
 				</div>
 
+				<div id="searchForm" style="padding-top: 15px;">
+					<hr>
+					<label for="searchFor"> Search </label>
+					<input type="text" id="searchFor" class="form-control" placeholder='Search all attributes by name (default) or use tags ("type:xyz")' required="true">
+				</div>
+
 				<div style="padding-top: 15px;">
 					<hr>
-					<table class="table">
+					<table class="table" style="table-layout: fixed;">
 						<thead>
 							<tr>
 								<th> Type </th>
 								<th> Value </th>
 								<th> Source </th>
+								<th> Time Uploaded </th>
 							</tr>
 						</thead>
 						<tbody id="realtimeDataTable">

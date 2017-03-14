@@ -2,12 +2,17 @@ window.onload = function(e) {
 
   $("#importForm").hide();
   $("#insertForm").hide();
+  $("#searchForm").hide();
 
   getAllData(function(data) {
     for(var i = 0; i < data.results.length; i++) {
-      addDataRow(data.results[i].category, data.results[i].value, data.results[i].source, false);
+      addDataRow(data.results[i].category, data.results[i].value, data.results[i].source, data.results[i].time);
     }
   });
+
+  $("#searchFor").on("input", function(event) {
+    filterEntries($("#searchFor").val());
+  })
 }
 
 function submitInsertForm() {
@@ -31,13 +36,15 @@ function submitInsertForm() {
     $("#insertSource").val("");
 
     postData(type, value, source, function(data, success) {
-      addDataRow(type, value, source);
+      addDataRow(type, value, source, time);
     })
   }
 }
 
-function addDataRow(type, value, source, prepend=true) {
-  var html = $("<tr> <td>" + type + "</td> <td>" + value + "</td> <td>" + source + "</td ></tr>")
+function addDataRow(type, value, source, time, prepend=true) {
+  parsedTime = new Date(Date.parse(time)).toTimeString();
+
+  var html = $("<tr> <td>" + type + "</td> <td>" + value + "</td> <td>" + source + "</td> <td>" + parsedTime + "</td> </tr>")
     .on("click", function(event) {
       var row = $(this);
 
@@ -64,19 +71,30 @@ function addDataRow(type, value, source, prepend=true) {
 
         if(!$.contains(ref[0], event.target)) {
           var entries = ref.find("td input");
+
+          var data = [];
+
           for(let i = 0; i < entries.length; i++) {
             var vl = $(entries[i]).val();
             if(vl === "") vl = $(entries[i]).attr("placeholder");
             $(entries[i]).parent().replaceWith('<td>' + vl + '</td>');
-            //TODO: CALL PUT() request
+
+            data.push(vl);
           }
+
+          //TODO: CALL PUT() request
+          putData(1, data[0], data[1], data[2], function(data, success) {
+            console.log("Put data with result: " + JSON.stringify(data));
+            console.log("Success value: " + success);
+          })
+
           $(document).off("click");
           ref.removeClass("editing");
         }
       });
 
       var entries = ref.find("td");
-      for(let i = 0; i < entries.length; i++) {
+      for(let i = 0; i < entries.length - 1; i++) {
         var vl = entries[i].innerHTML;
         $(entries[i]).replaceWith('<td><input type="text" placeholder="' + vl + '"></td>');
       }
@@ -91,4 +109,28 @@ function addDataRow(type, value, source, prepend=true) {
   } else {
     $("#realtimeDataTable").append(html);
   }
+}
+
+function filterEntries(search) {
+  search = search.toLowerCase();
+  var allRows = $("#realtimeDataTable tr");
+  allRows.each(function(index, val) {
+    $(this).hide();
+    if($(this).html().toLowerCase().includes(search)) {
+      $(this).show();
+    }
+  });
+}
+
+function deleteSelected() {
+  var allRows = $("#realtimeDataTable tr");
+  allRows.each(function(index, val) {
+    if($(this).hasClass("highlight")) {
+      deleteData(index + 1, function(data, success) {
+        console.log("delete returned data: " + JSON.stringify(data));
+        console.log("delete returned success code: " + success);
+        $(this).hide();
+      });;
+    }
+  });
 }

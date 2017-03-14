@@ -84,11 +84,14 @@ function getNextData(nextURL, whenDone) {
  * @param  {String} type   The category of the data
  * @param  {Integer} value  The value
  * @param  {String} source Where this data originated from
+ * @param  {String} time An ISO string representing the time uploaded
  * @param  {function} whenDone A callback function called when the post request finishes
  */
 function postData(type, value, source, whenDone) {
+  //Update with the time of recieving the post request
+  time = new Date(Date.now()).toISOString();
 
-  var dat = '{ "category": "' + type + '", "value": ' + value + ', "source": "' + source + '" }'
+  var dat = '{ "category": "' + type + '", "value": ' + value + ', "source": "' + source + '", "time:": "' + time + '" }'
   console.log("Trying to post data: '" + dat + "'")
 
   $.ajax({
@@ -108,4 +111,35 @@ function postData(type, value, source, whenDone) {
     }*/
     success: whenDone
   });
+}
+
+function putData(key, type, value, source, whenDone) {
+  //Update the time to represent the value (TODO: CHANGE THIS TO USE ORIGINAL)
+  time = new Date(Date.now()).toISOString();
+
+  url = "/api/" + key + "/";
+  console.log("Put to url: '" + url + "'")
+
+  var dat = '{ "category": "' + type + '", "value": ' + value + ', "source": "' + source + '", "time": "' + time + '" }'
+  console.log("Data: '" + dat + "'")
+  $.ajax({
+    type: "PUT",
+    url: url,
+    username: username,
+    password: password,
+    data: dat,
+    contentType: "application/json",
+    success: whenDone
+  })
+}
+
+function deleteData(key, whenDone) {
+  $.ajax({
+    type: "DELETE",
+    url: "/api/" + key + "/",
+    username: username,
+    password: password,
+    contentType: "application/json",
+    success: whenDone
+  })
 }
