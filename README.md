@@ -10,9 +10,9 @@ A Django-powered web app that allows users to visualize and predict arbitrary da
 
 ## To-do for first project deadline
 
-* Refactor front-end to include common HTML/JS functions
-* Implement basic functions (add/get/insert/delete/update) in both front-end and in pure SQL in backend
+* ~~Refactor front-end to include common HTML/JS functions~~
+* ~~Implement basic functions (add/get/insert/delete/update) in both front-end and in pure SQL in backend~~
+  * Note: delete/update currently have an issue. /api/(key) doesn't work properly
 * ~~Deploy to some live server (heroku)~~
-* Write out advanced functions (real-time & predictive get) in pure SQL
-* Post advanced functions onto a subpage on our wiki
-* (Stretch goal) Implement linear regression in pure SQL
+* ~~Post advanced functions onto a subpage on our wiki~~
+* Write out advanced functions in pure SQL
