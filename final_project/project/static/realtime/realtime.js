@@ -42,7 +42,8 @@ function submitInsertForm() {
 }
 
 function addDataRow(type, value, source, time, prepend=true) {
-  parsedTime = new Date(Date.parse(time)).toTimeString();
+
+  parsedTime = time;//new Date(Date.parse(time));//new Date(Date.parse(time)).toTimeString();
 
   var html = $("<tr> <td>" + type + "</td> <td>" + value + "</td> <td>" + source + "</td> <td>" + parsedTime + "</td> </tr>")
     .on("click", function(event) {
@@ -83,7 +84,11 @@ function addDataRow(type, value, source, time, prepend=true) {
           }
 
           //TODO: CALL PUT() request
-          putData(1, data[0], data[1], data[2], function(data, success) {
+
+          //console.log(new Date(Date.parse(ref.find("td")[3].innerHTML)));
+          console.log(ref.find("td")[3].innerHTML);
+
+          putData(ref.find("td")[3].innerHTML, data[0], data[1], data[2], function(data, success) {
             console.log("Put data with result: " + JSON.stringify(data));
             console.log("Success value: " + success);
           })
@@ -126,7 +131,7 @@ function deleteSelected() {
   var allRows = $("#realtimeDataTable tr");
   allRows.each(function(index, val) {
     if($(this).hasClass("highlight")) {
-      deleteData(index + 1, function(data, success) {
+      deleteData($(this).find("td")[3].val(), function(data, success) {
         console.log("delete returned data: " + JSON.stringify(data));
         console.log("delete returned success code: " + success);
         $(this).hide();

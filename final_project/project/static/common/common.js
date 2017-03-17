@@ -31,14 +31,6 @@ function getData(whenDone) {
     dataType: "json",
     username: username,
     password: password,
-    /*
-    success: function(data, status) {
-      console.log("Finished get request. Response:");
-      console.log(JSON.stringify(data));
-      console.log(status);
-      console.log("End get response.");
-      return data;
-    }*/
     success: whenDone
   });
 }
@@ -49,21 +41,32 @@ function getData(whenDone) {
  * @param  {[type]} whenDone [description]
  * @return {[type]}          [description]
  */
-function getAllData(whenDone) {
-  getAllDataRecur("/api/?format=json", whenDone);
+function getAllData(onUpdate, onComplete) {
+  getAllDataRecur("/api/?format=json", [], onUpdate, onComplete);
 }
 
 /**
  * Recursive call that gets all the pages of data. Don't call this directly,
  * instead use "getAllData".
- * @param  {[type]} nextURL  [description]
- * @param  {[type]} whenDone [description]
- * @return {[type]}          [description]
+ * @param  {String} nextURL  The url to call GET on
+ * @param  {Array} dataAccumulater An array of elements collected so far
+ * @param  {function} onUpdate A function called every time some more data is found
+ * @param  {function} onComplete A function called when all data is found
+ * @return {Array} An array of all the elements found
  */
-function getAllDataRecur(nextURL, whenDone) {
+function getAllDataRecur(nextURL, dataAccumulater, onUpdate, onComplete) {
+  if(nextURL === null) {
+    if(typeof onComplete === "function") {
+      onComplete(dataAccumulater);
+    }
+  }
+
   getNextData(nextURL, function(data, success) {
-    whenDone(data, success);
-    getAllDataRecur(data.next, whenDone);
+    dataAccumulater = dataAccumulater.concat(data.results);
+    if(typeof onUpdate === "function") {
+      onUpdate(data, success);
+    }
+    getAllDataRecur(data.next, dataAccumulater, onUpdate, onComplete);
   })
 }
 
@@ -101,14 +104,6 @@ function postData(type, value, source, whenDone) {
     password: password,
     data: dat,
     contentType: "application/json",
-    /*
-    success: function(data, status) {
-      console.log("Finished a post request. Response: ");
-      console.log(JSON.stringify(data));
-      console.log(status);
-      console.log("End post response.");
-      return data;
-    }*/
     success: whenDone
   });
 }
