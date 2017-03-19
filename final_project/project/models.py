@@ -8,7 +8,12 @@ class Data(models.Model):
 	category = models.CharField(max_length = 200)
 	value = models.IntegerField(default = 0)
 	source = models.CharField(max_length = 200)
-	time = models.DateTimeField(default=timezone.now)
+	time = models.DateTimeField(default=timezone.now) 
+	Sensor = models.ForeignKey(
+        'Sensors',
+        on_delete=models.CASCADE, 
+
+    )
 
 	def addData(self, data):
 		with connection.cursor() as cur:
@@ -28,3 +33,8 @@ class Data(models.Model):
 	def updateData(self, data):
 		with connection.cursor() as cur:
 			cur.execute('UPDATE project_data SET category = %s, value = %s, source = %s WHERE time = %s', [data.category, data.value, data.source, data.time])
+
+class Sensors(models.Model):
+    
+    sensor_id = models.AutoField(primary_key=True) 
+    Sensor_name = models.CharField(max_length = 200)
