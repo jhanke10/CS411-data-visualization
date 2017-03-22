@@ -62,6 +62,7 @@ function getAllDataRecur(nextURL, dataAccumulater, onUpdate, onComplete) {
   }
 
   getNextData(nextURL, function(data, success) {
+    //console.log(JSON.stringify(data));
     dataAccumulater = dataAccumulater.concat(data.results);
     if(typeof onUpdate === "function") {
       onUpdate(data, success);
@@ -90,11 +91,11 @@ function getNextData(nextURL, whenDone) {
  * @param  {String} time An ISO string representing the time uploaded
  * @param  {function} whenDone A callback function called when the post request finishes
  */
-function postData(type, value, source, whenDone) {
+function postData(name, value, whenDone) {
   //Update with the time of recieving the post request
   time = new Date(Date.now()).toISOString();
 
-  var dat = '{ "category": "' + type + '", "value": ' + value + ', "source": "' + source + '", "time:": "' + time + '" }'
+  var dat = '{ "name": "' + name + '", "value": ' + value + ', "time:": "' + time + '" }'
   console.log("Trying to post data: '" + dat + "'")
 
   $.ajax({

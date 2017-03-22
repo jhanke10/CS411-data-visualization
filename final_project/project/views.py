@@ -1,8 +1,12 @@
-from django.http import HttpResponse
+import json
+
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
-from project.models import Data
+#from project.models import Data
 from rest_framework import viewsets
-from .serializers import DataSerializer
+from .serializers import NumericalDataSerializer
+
+from project.models import NumericalData
 
 from rest_framework import status
 from rest_framework.decorators import api_view
@@ -34,6 +38,44 @@ def search(request):
 
 # def api(request):
 # 	return render(request, "api/index.html", context={}, )
+
+@api_view(['GET', 'POST'])
+def api(request):
+	if request.method == "GET":
+		'''
+		allData = NumericalData.objects.values()
+		print("Printing all data")
+		print(allData)
+		for record in allData:
+			#print(record.first, record.second)
+			print(str(record))
+		#return JsonResponse(json.dumps(list(allData)))
+		return HttpResponse("Testing in progress")
+		'''
+
+		allData = NumericalData.objects.all()
+		serializer = NumericalDataSerializer(allData, many=True)
+
+		#Try to, for example, return all unique names of entries when GET UNIQUE is called
+		return JsonResponse(serializer.data, safe=False)
+	elif request.method == "POST":
+		print("POST request with data=", request.data)
+		serializer = NumericalDataSerializer(data=request.data)
+		if serializer.is_valid():
+			content = JSONRenderer().render(serializer.validated_data)
+			stream = BytesIO(content)
+			data = JSONParser().parse(stream)
+			#with connection.cursor() as cur:
+			#	cur.execute('INSERT INTO project_data (dataID, name, time, value) VALUES (%s, %s, %s, %s);', [str(data['dataID']), int(data['name']), datetime.now(), str(data['value'])])
+			serializer.save()
+			#data = NumericalData.objects.raw('SELECT * FROM project_data')
+			#serializer = NumericalDataSerializer(data, many=True)
+			return Response(serializer.data)
+		else:
+			return Response(
+				serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 
 # @api_view(['GET', 'POST'])
 # def data_list(request):
@@ -95,6 +137,7 @@ def search(request):
 #         data.deleteData()
 #         return Response(status=status.HTTP_204_NO_CONTENT)
 
+'''
 class DataList(generics.ListCreateAPIView):
 	queryset = Data.objects.all()
 	serializer_class = DataSerializer
@@ -102,6 +145,7 @@ class DataList(generics.ListCreateAPIView):
 class DataDetail(generics.RetrieveUpdateDestroyAPIView):
 	queryset = Data.objects.all()
 	serializer_class = DataSerializer
+	'''
 
 
 # class DataViewSet(viewsets.ModelViewSet):

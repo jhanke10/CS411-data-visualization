@@ -64,15 +64,12 @@
 					<hr>
 					<label for="insertType"> Insert single entry </label>
 					<div class="row" style="margin: 0px;">
-						<div class="col-xs-4" style="padding: 0px;">
-						  <input type="text" id="insertType" class="form-control" placeholder="Type" required="true">
+						<div class="col-xs-6" style="padding: 0px;">
+							<input type="text" id="insertName" class="form-control" placeholder="Human-readable name" required="true">
 						</div>
-						<div class="col-xs-4" style="padding: 0px;">
-							<input type="text" id="insertValue" class="form-control" placeholder="Value" required="true">
-						</div>
-						<div class="col-xs-4" style="padding: 0px;">
+						<div class="col-xs-6" style="padding: 0px;">
 							<div class="input-group">
-								<input type="text" id="insertSource" class="form-control" placeholder="Source" required="true">
+								<input type="text" id="insertValue" class="form-control" placeholder="Value" required="true">
 								<span class="input-group-btn">
 									<button id="insertSubmit" class="btn btn-default" type="button" onclick="submitInsertForm();"> Append </button>
 								</span>

@@ -34,9 +34,10 @@ urlpatterns = [
   url(r'^predictive/', projectViews.predictive),
   url(r'^search/', projectViews.search),
   # url(r'^', include(router.urls)),
-  url(r'^api/$', projectViews.DataList.as_view()),
-  url(r'^api/(?P<pk>[0-9]+)/$', projectViews.DataDetail.as_view()),
+  #url(r'^api/$', projectViews.DataList.as_view()),
+  #url(r'^api/(?P<pk>[0-9]+)/$', projectViews.DataDetail.as_view()),
   url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+  url(r'^api/', projectViews.api),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

@@ -1,14 +1,22 @@
 from __future__ import unicode_literals
 from datetime import datetime
 
+import uuid
+
 from django.db import models, connection
 from django.utils import timezone
 
-class Data(models.Model):
-	category = models.CharField(max_length = 200)
-	value = models.IntegerField(default = 0)
-	source = models.CharField(max_length = 200)
-	time = models.DateTimeField(default=timezone.now)
+class NumericalData(models.Model):
+	#For now, we push everything to just one sensor type. Later add multiple.
+	#sensorID = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+	dataID   = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+	name     = models.CharField(max_length = 200)
+	time     = models.DateTimeField(default=timezone.now)
+	value    = models.IntegerField(default = 0)
+
+	#Useful for printing out data entries
+	def __str__(self):
+		return "NumericalData(dataID=" + str(self.dataID) + ", name=" + str(self.name) + ", time=" + str(self.time) + ", value=" + str(self.value) + ")"
 
 	def addData(self, data):
 		with connection.cursor() as cur:

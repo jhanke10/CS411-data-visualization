@@ -4,11 +4,19 @@ window.onload = function(e) {
   $("#insertForm").hide();
   $("#searchForm").hide();
 
+  /*
   getAllData(function(data) {
     for(var i = 0; i < data.results.length; i++) {
       addDataRow(data.results[i].category, data.results[i].value, data.results[i].source, data.results[i].time);
     }
-  });
+  });*/
+
+  getData(function(data) {
+    for(var i = 0; i < data.length; i++) {
+      console.log("Data: " + data[i].dataID + ", " + data[i].name + ", " + data[i].value + ", " + data[i].time)
+      addDataRow(data[i].name, data[i].value, data[i].time, data[i].dataID);
+    }
+  })
 
   $("#searchFor").on("input", function(event) {
     filterEntries($("#searchFor").val());
@@ -16,36 +24,35 @@ window.onload = function(e) {
 }
 
 function submitInsertForm() {
-  var type = $("#insertType").val();
+  var name = $("#insertName").val();
   var value = $("#insertValue").val();
-  var source = $("#insertSource").val();
 
-  function setFail(name, to) {
-    to ? $(name).attr("style", "border: 1px solid darkred") : $(name).removeAttr("style");
+  function setFail(nam, to) {
+    to ? $(nam).attr("style", "border: 1px solid darkred") : $(nam).removeAttr("style");
     return to;
   }
 
   var failed =
-    setFail("insertType", type === "") ||
     setFail("insertValue", value === "" || isNaN(value)) ||
-    setFail("insertSource", source === "");
+    setFail("insertName", name === "");
+
+  console.log("Failed?: " + failed);
 
   if(!failed) {
-    $("#insertType").val("");
     $("#insertValue").val("");
-    $("#insertSource").val("");
+    $("#insertName").val("");
 
-    postData(type, value, source, function(data, success) {
-      addDataRow(type, value, source, time);
+    postData(name, value, function(data, success) {
+      addDataRow(name, value, time);
     })
   }
 }
 
-function addDataRow(type, value, source, time, prepend=true) {
+function addDataRow(name, value, time, prepend=true) {
 
   parsedTime = time;//new Date(Date.parse(time));//new Date(Date.parse(time)).toTimeString();
 
-  var html = $("<tr> <td>" + type + "</td> <td>" + value + "</td> <td>" + source + "</td> <td>" + parsedTime + "</td> </tr>")
+  var html = $("<tr> <td>" + name + "</td> <td>" + value + "</td> <td>" + parsedTime + "</td> </tr>")
     .on("click", function(event) {
       var row = $(this);
 

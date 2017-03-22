@@ -1,4 +1,4 @@
-from project.models import Data
+from project.models import NumericalData
 from rest_framework import serializers
 
 
@@ -13,7 +13,7 @@ from rest_framework import serializers
 #         model = Group
 #         fields = ('url', 'name')
 
-class DataSerializer(serializers.HyperlinkedModelSerializer):
+class NumericalDataSerializer(serializers.HyperlinkedModelSerializer):
 	class Meta:
-		model = Data
-		fields = ('category', 'value', 'source', 'time')
+		model = NumericalData
+		fields = ('dataID', 'name', 'time', 'value')
