@@ -18,10 +18,11 @@ from rest_framework.parsers import JSONParser
 from rest_framework import generics
 from rest_framework import viewsets
 from rest_framework.views import APIView
-
+from scipy.interpolate import interp1d
 #numpy
 import numpy as np
-import scipy as sp
+import scipy as sp 
+
 
 start = datetime.utcfromtimestamp(0)
 
@@ -166,7 +167,43 @@ def finite_differences(request):
 			#TODO: add error metrics
 			return JsonResponse({'coefficients': dx.tolist()})
 		except KeyError as e:
-			return Response(status=status.HTTP_400_BAD_REQUEST) 
+			return Response(status=status.HTTP_400_BAD_REQUEST)   
+
+def interploate (request): 
+	if request.method == "GET":
+		return JsonResponse({'test':123})
+	elif request.method == "POST":
+		try:
+			source_id1 = request.POST.get("source_id1")
+			min_time1 = request.POST.get("min_time1")
+			max_time1 = request.POST.get("max_time1")
+
+			source_id2 = request.POST.get("source_id2")
+			min_time2 = request.POST.get("min_time2")
+			max_time2 = request.POST.get("max_time2")
+
+			k = request.POST.get("k")
+
+			#Execute the SQL search with above parameters to get x and y
+
+			xSource = np.array([0, 1, 2, 3])
+			ySource = np.array([-1, 0.2, 0.9, 2.1])
+			k = 1
+
+			if xSource.shape[0] != ySource.shape[0]:
+				return Response(status=status.HTTP_400_BAD_REQUEST)
+			if k <= 0 or k > 5:
+				return Response(status=status.HTTP_400_BAD_REQUEST)  
+			x = np.linspace(0, 10, num=11, endpoint=True)
+			y = np.cos(-x**2/9.0)
+			f = interp1d(x, y)
+			f2 = interp1d(x, y, kind='cubic')
+
+			xnew = np.linspace(0, 10, num=41, endpoint=True) 
+			#TODO: add error metrics
+			return JsonResponse({'coefficients': xnew.tolist()})
+		except KeyError as e:
+			return Response(status=status.HTTP_400_BAD_REQUEST)  
 
 class SourceList(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
