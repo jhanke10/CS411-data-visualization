@@ -31,6 +31,8 @@ urlpatterns = [
   url(r'^predictive/', projectViews.predictive),
   url(r'^api/$', projectViews.DataList.as_view()),
   url(r'^api/(?P<pk>[0-9]+)/$', projectViews.DataDetail.as_view()),
+  url(r'^api/search/$',projectViews.search),
+  url(r'^api/compare/$',projectViews.compare),
   url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 ]
 
