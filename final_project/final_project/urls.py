@@ -32,6 +32,7 @@ urlpatterns = [
   url(r'^api/$', projectViews.DataList.as_view()),
   url(r'^api/(?P<pk>[0-9]+)/$', projectViews.DataDetail.as_view()),
   url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
+  url(r'^api/predict/linear/', projectViews.linearRegression),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

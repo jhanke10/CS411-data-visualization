@@ -1,4 +1,5 @@
 from django.http import HttpResponse
+from django.http import JsonResponse
 from django.shortcuts import render
 from project.models import Data
 from .serializers import DataSerializer
@@ -17,6 +18,10 @@ from rest_framework import generics
 from rest_framework import viewsets
 from rest_framework.views import APIView
 
+#numpy
+import numpy as np
+import scipy as sp
+
 def index(request):
 	return render(request, "main/index.html", context={}, )
 
@@ -28,6 +33,39 @@ def visualization(request):
 
 def predictive(request):
 	return render(request, "predictive/index.html", context={}, )
+
+def linearRegression(request):
+	if request.method == "GET":
+		return JsonResponse({'test':123})
+	elif request.method == "POST":
+		try:
+			source_id1 = request.POST.get("source_id1")
+			min_time1 = request.POST.get("min_time1")
+			max_time1 = request.POST.get("max_time1")
+
+			source_id2 = request.POST.get("source_id2")
+			min_time2 = request.POST.get("min_time2")
+			max_time2 = request.POST.get("max_time2")
+
+			k = request.POST.get("k")
+
+			#Execute the SQL search with above parameters to get x and y
+
+			xSource = np.array([0, 1, 2, 3])
+			ySource = np.array([-1, 0.2, 0.9, 2.1])
+			k = 1
+
+			if xSource.shape[0] != ySource.shape[0]:
+				return Response(status=status.HTTP_400_BAD_REQUEST)
+			if k <= 0 or k > 5:
+				return Response(status=status.HTTP_400_BAD_REQUEST)
+
+			p = np.polyfit(xSource, ySource, k)
+
+			#TODO: add error metrics
+			return JsonResponse({'coefficients': p.tolist()})
+		except KeyError as e:
+			return Response(status=status.HTTP_400_BAD_REQUEST)
 
 class DataList(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
