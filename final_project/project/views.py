@@ -46,30 +46,33 @@ def search(request):
 		content = JSONRenderer().render(serializer.data)
 		stream = BytesIO(content)
 		data = JSONParser().parse(stream)
-		try:
-			keys = data.keys()
-			time_range = len(keys)
-			sql = 'SELECT * FROM project_data WHERE'
-			for i in range(len(keys)):
-				if keys[i] == 'time_range':
-					sql += ' ' + keys[i] + ' >= %s AND ' + keys[i] + ' <= %s'
-					time_range = i
-				else:
-					sql += ' ' + keys[i] + ' = %s'
-				if i < len(keys) - 1:
-					sql += ' AND'
-			values = data.values()
-			if time_range < len(keys):
-				time1 = int(values[time_range].split('-')[0])
-				time2 = int(values[time_range].split('-')[1])
-				values[time_range] = time1
-				values.insert(time_range + 1, time2)
+		return search_data(data)
+	return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+def search_data(data):
+	try:
+		keys = data.keys()
+		time_range = len(keys)
+		sql = 'SELECT * FROM project_data WHERE'
+		for i in range(len(keys)):
+			if keys[i] == 'time_range':
+				sql += ' ' + keys[i] + ' >= %s AND ' + keys[i] + ' <= %s'
+				time_range = i
+			else:
+				sql += ' ' + keys[i] + ' = %s'
+			if i < len(keys) - 1:
+				sql += ' AND'
+		values = data.values()
+		if time_range < len(keys):
+			time1 = int(values[time_range].split('-')[0])
+			time2 = int(values[time_range].split('-')[1])
+			values[time_range] = time1
+			values.insert(time_range + 1, time2)
 			data_points = Data.objects.raw(sql, values)
 			serializer = DataSerializer(data_points, many = True)
 			return Response(serializer.data)
-		except Data.DoesNotExist:
-			raise HTTP_404_NOT_FOUND
-	return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+	except Data.DoesNotExist:
+		raise HTTP_404_NOT_FOUND
 
 def compare(request):
 	serializer = DataSerializer(data=request.data)
