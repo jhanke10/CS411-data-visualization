@@ -121,6 +121,53 @@ def linearRegression(request):
 		except KeyError as e:
 			return Response(status=status.HTTP_400_BAD_REQUEST)
 
+def finite_differences(request): 
+	if request.method == "GET":
+		return JsonResponse({'test':123})
+	elif request.method == "POST":
+		try:
+			source_id1 = request.POST.get("source_id1")
+			min_time1 = request.POST.get("min_time1")
+			max_time1 = request.POST.get("max_time1")
+
+			source_id2 = request.POST.get("source_id2")
+			min_time2 = request.POST.get("min_time2")
+			max_time2 = request.POST.get("max_time2")
+
+			k = request.POST.get("k")
+
+			#Execute the SQL search with above parameters to get x and y
+
+			xSource = np.array([0, 1, 2, 3])
+			ySource = np.array([-1, 0.2, 0.9, 2.1])
+			k = 1
+
+			if xSource.shape[0] != ySource.shape[0]:
+				return Response(status=status.HTTP_400_BAD_REQUEST)
+			if k <= 0 or k > 5:
+				return Response(status=status.HTTP_400_BAD_REQUEST) 
+			#Normalization: 
+			for i in range(0, xSource.shape[0]-1):
+				dx = ySource[i+1]-ySource[i]/(xSource[i+1] - xSource[i]) # use np.diff(x) if x is not uniform
+				#dxdx = dx**2
+
+			#First derivatives:
+			#df = np.diff(f) / dx
+			#cf = np.convolve(f, [1,-1]) / dx
+			#gf = ndimage.gaussian_filter1d(f, sigma=1, order=1, mode='wrap') / dx
+
+			#Second derivatives:
+			#ddf = np.diff(f, 2) / dxdx
+			#ccf = np.convolve(f, [1, -2, 1]) / dxdx
+			#ggf = ndimage.gaussian_filter1d(f, sigma=1, order=2, mode='wrap') / dxdx
+
+						#p = np.polyfit(xSource, ySource, k)
+
+			#TODO: add error metrics
+			return JsonResponse({'coefficients': dx.tolist()})
+		except KeyError as e:
+			return Response(status=status.HTTP_400_BAD_REQUEST) 
+
 class SourceList(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
                   generics.GenericAPIView):
