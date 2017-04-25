@@ -23,6 +23,9 @@ from rest_framework.views import APIView
 import numpy as np
 import scipy as sp
 
+#json parsing
+import json
+
 start = datetime.utcfromtimestamp(0)
 
 def time(time):
@@ -56,12 +59,13 @@ def search_data(data):
 		sql = 'SELECT * FROM project_data WHERE'
 		for i in range(len(keys)):
 			if keys[i] == 'time_range':
-				sql += ' ' + keys[i] + ' >= %d AND ' + keys[i] + ' <= %d'
+				sql += ' create_time >= %s AND create_time <= %s'
 				time_range = i
-			else:
-				sql += ' ' + keys[i] + ' = %s'
+			if keys[i] == 'source_id':
+				sql += ' source_id = %s'
 			if i < len(keys) - 1:
 				sql += ' AND'
+		sql += ";"
 		values = data.values()
 		if time_range < len(keys):
 			time1 = int(values[time_range].split('-')[0])
@@ -96,35 +100,40 @@ def linearRegression(request):
 		return JsonResponse({'test':123})
 	elif request.method == "POST":
 		try:
-			print(request.data)
-			print(request.POST.items())
-			print(request.POST.values())
-			source_id1 = request.POST.get("source_id1")
-			time1 = str(request.POST.get("min_time1")) + "-" + str(request.POST.get("max_time1"))
-			xSource = search({"source": source_id1, "time_range": time1})
+			print(request.body)
+			data = json.loads(request.body)
 
-			source_id2 = request.POST.get("source_id2")
-			time2 = str(request.POST.get("min_time2")) + "-" + str(request.POST.get("max_time2"))
-			ySource = search({"source": source_id2, "time_range": time2})
+			source_id1 = data["source_id1"]
+			time1 = str(data["min_time1"]) + "-" + str(data["max_time1"])
+			xSource = search_data({"source_id": source_id1, "time_range": time1})
+			#print("X source:", xSource)
 
-			k = request.POST.get("k")
+			source_id2 = data["source_id2"]
+			time2 = str(data["min_time2"]) + "-" + str(data["max_time2"])
+			ySource = search_data({"source_id": source_id2, "time_range": time2})
 
-			print("X:",xSource)
-			print("Y:",ySource)
+			k = data["k"]
 
-			#Execute the SQL search with above parameters to get x and y
+			#TODO: Possibly handle this gracefully by removing start/end of one data set?
+			if(len(xSource) != len(ySource)):
+				return Resonse(status=status.HTTP_400_BAD_REQUEST)
 
-
-			#xSource = np.array([0, 1, 2, 3])
-			#ySource = np.array([-1, 0.2, 0.9, 2.1])
-			k = 1
-
-			if xSource.shape[0] != ySource.shape[0]:
-				return Response(status=status.HTTP_400_BAD_REQUEST)
 			if k <= 0 or k > 5:
 				return Response(status=status.HTTP_400_BAD_REQUEST)
 
-			p = np.polyfit(xSource, ySource, k)
+			#Convert the resulting OrderedDict into a raw array of values
+			xData = []
+			yData = []
+			for i in xSource:
+				xData.append(i["value"])
+			for i in ySource:
+				yData.append(i["value"])
+
+			#xSource = np.array([0, 1, 2, 3])
+			#ySource = np.array([-1, 0.2, 0.9, 2.1])
+
+
+			p = np.polyfit(xData, yData, k)
 
 			#TODO: add error metrics
 			return JsonResponse({'coefficients': p.tolist()})

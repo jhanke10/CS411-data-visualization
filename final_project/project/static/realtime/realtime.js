@@ -4,9 +4,18 @@ window.onload = function(e) {
   $("#insertForm").hide();
   $("#searchForm").hide();
 
+  $("#insertSourceForm").hide();
+
   getAllData(function(data) {
     for(var i = 0; i < data.results.length; i++) {
       addDataRow(data.results[i].category, data.results[i].value, data.results[i].source, data.results[i].time);
+    }
+  });
+
+  getAllSources(function(data) {
+    console.log(JSON.stringify(data));
+    for(var i = 0; i < data.length; i++) {
+      addSourceRow(data[i].source_id, data[i].source_name);
     }
   });
 
@@ -138,4 +147,22 @@ function deleteSelected() {
       });;
     }
   });
+}
+
+function addSourceRow(id, name) {
+  var newOption = document.createElement("option");
+  newOption.innerHTML = name + " (id=" + id + ")";
+
+  $("#sourceDropdown").append(newOption);
+}
+
+function copySourceIDToClipboard() {
+  var text = $("#sourceDropdown").val();
+  text = text.substring(text.indexOf("=") + 1, text.indexOf(")"));
+
+  var $temp = $("<input>");
+  $("body").append($temp);
+  $temp.val(text).select();
+  document.execCommand("copy");
+  $temp.remove();
 }

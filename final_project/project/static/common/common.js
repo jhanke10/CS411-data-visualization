@@ -167,6 +167,17 @@ function getSource(sourceID, whenDone) {
   })
 }
 
+function getAllSources(whenDone) {
+  $.ajax({
+    type: "GET",
+    url: "/api/source/",
+    username: username,
+    password: password,
+    contentType: "application/json",
+    success: whenDone
+  })
+}
+
 function updateSource(sourceID, newName, whenDone) {
   var dat = '{ "source_name": "' + newName + '" }';
   console.log("Calling updateSource with data: '" + dat + "'");
@@ -197,7 +208,18 @@ function deleteSource(sourceID, whenDone) {
 ////////////////////////////////////////////////////////////////////////////////
 
 function postLinear(source1, minTime1, maxTime1, source2, minTime2, maxTime2, k, whenDone) {
-  var dat = '{ "source_id1": "' + source1 + '", "min_time1": ' + minTime1 + ', "max_time1": ' + maxTime1 + ', "source_id2": "' + source2 + '", "min_time2": ' + minTime2 + ', "max_time2": ' + maxTime2 + ', "k": ' + k + '}';
+  //var dat = '{ "source_id1": "' + source1 + '", "min_time1": ' + minTime1 + ', "max_time1": ' + maxTime1 + ', "source_id2": "' + source2 + '", "min_time2": ' + minTime2 + ', "max_time2": ' + maxTime2 + ', "k": ' + k + '}';
+
+  var dat = JSON.stringify({
+    "source_id1": source1,
+    "min_time1": minTime1,
+    "max_time1": max_time1,
+    "source_id2": source2,
+    "min_time2": minTime2,
+    "max_time2": maxTime2,
+    "k": k
+  })
+
   console.log("postLinear with data '" + dat + "'");
   $.ajax({
     type: "POST",
