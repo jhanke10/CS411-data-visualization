@@ -137,12 +137,29 @@ function deleteData(key, whenDone) {
   })
 }
 
+function searchData(whenDone, source_id, minTime, maxTime) {
+  var dataObject = {"source_id": source_id};
+  if(minTime && maxTime) {
+    dataObject.time_range = minTime + "-" + maxTime;
+  }
+
+  $.ajax({
+    type: "POST",
+    url: "/api/search/",
+    username: username,
+    password: password,
+    data: JSON.stringify(dataObject),
+    contentType: "application/json",
+    success: whenDone
+  })
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 /* Source API */
 ////////////////////////////////////////////////////////////////////////////////
 
 function createSource(name, whenDone) {
-  var dat = '{ "source_id": "default", "source_name": "' + name + '" }';
+  var dat = '{  "source_name": "' + name + '" }';
   console.log("Trying to post data: '" + dat + "'")
 
   $.ajax({

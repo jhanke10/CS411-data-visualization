@@ -5,18 +5,39 @@ window.onload = function(e) {
   $("#searchForm").hide();
 
   $("#insertSourceForm").hide();
+  $("#updateSourceForm").hide();
 
+  /*
   getAllData(function(data) {
     for(var i = 0; i < data.results.length; i++) {
       addDataRow(data.results[i].category, data.results[i].value, data.results[i].source, data.results[i].time);
     }
   });
+  */
+
 
   getAllSources(function(data) {
-    console.log(JSON.stringify(data));
+    //console.log(JSON.stringify(data));
     for(var i = 0; i < data.length; i++) {
       addSourceRow(data[i].source_id, data[i].source_name);
     }
+
+    //Set up default insert form text
+    var source_id = $("#sourceDropdown").val();
+    //console.log(source_id);
+    source_id = source_id.substring(source_id.indexOf("=") + 1, source_id.indexOf(")"));
+
+    var name = $("#sourceDropdown").val();
+    name = name.substring(0, name.indexOf(" "));
+    $("#insertSource").val("Source: " + name);
+    $("#insertSource").attr("sourceID", source_id);
+
+    searchData(function(data) {
+      //console.log("Returned data: " + JSON.stringify(data));
+      for(var i = 0; i < data.results.length; i++) {
+        addDataRow(data.results[i].data_id, data.results[i].category, data.results[i].value, data.results[i].create_time, data.results[i].upload_time);
+      }
+    }, source_id);
   });
 
   $("#searchFor").on("input", function(event) {
@@ -50,11 +71,26 @@ function submitInsertForm() {
   }
 }
 
-function addDataRow(type, value, source, time, prepend=true) {
+//function addDataRow(type, value, source, time, prepend=true) {
+function addDataRow(id, category, value, createTime, uploadTime, prepend=true) {
 
-  parsedTime = time;//new Date(Date.parse(time));//new Date(Date.parse(time)).toTimeString();
+  function formatDate(date) {
+    var dateItself = date.toDateString();
+    dateItself = dateItself.substring(dateItself.indexOf(" ") + 1);
 
-  var html = $("<tr> <td>" + type + "</td> <td>" + value + "</td> <td>" + source + "</td> <td>" + parsedTime + "</td> </tr>")
+    var hours = date.getHours();
+    var minutes = date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes();
+    var seconds = date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds();
+    var timeItself = hours + ":" + minutes + ":" + seconds;
+
+    return dateItself + " " + timeItself;
+  }
+
+  parsedCreateTime = formatDate(new Date(createTime));
+  parsedUploadTime = formatDate(new Date(uploadTime));
+
+  //var html = $("<tr> <td>" + type + "</td> <td>" + value + "</td> <td>" + source + "</td> <td>" + parsedTime + "</td> </tr>")
+  var html = $("<tr> <td>" + id + "</td> <td>" + category + "</td> <td>" + value + "</td> <td>" + parsedCreateTime + "</td> <td>" + parsedUploadTime + "</td> </tr>")
     .on("click", function(event) {
       var row = $(this);
 
@@ -66,7 +102,7 @@ function addDataRow(type, value, source, time, prepend=true) {
       }
     })
     .on("selectstart dragstart", function(event) {
-      event.preventDefault(); return false;
+      //event.preventDefault(); return false;
     })
     .on("dblclick", function(event) {
       var ref = $(this);
@@ -97,10 +133,12 @@ function addDataRow(type, value, source, time, prepend=true) {
           //console.log(new Date(Date.parse(ref.find("td")[3].innerHTML)));
           console.log(ref.find("td")[3].innerHTML);
 
+          /*
           putData(ref.find("td")[3].innerHTML, data[0], data[1], data[2], function(data, success) {
             console.log("Put data with result: " + JSON.stringify(data));
             console.log("Success value: " + success);
           })
+          */
 
           $(document).off("click");
           ref.removeClass("editing");
@@ -123,6 +161,10 @@ function addDataRow(type, value, source, time, prepend=true) {
   } else {
     $("#realtimeDataTable").append(html);
   }
+}
+
+function clearData() {
+  $("#realtimeDataTable").empty();
 }
 
 function filterEntries(search) {
@@ -152,6 +194,17 @@ function deleteSelected() {
 function addSourceRow(id, name) {
   var newOption = document.createElement("option");
   newOption.innerHTML = name + " (id=" + id + ")";
+  newOption.onclick = function() {
+    $("#insertSource").val("Source: " + name);
+    $("#insertSource").attr("sourceID", id);
+
+    clearData();
+    searchData(function(data) {
+      for(var i = 0; i < data.results.length; i++) {
+        addDataRow(data.results[i].data_id, data.results[i].category, data.results[i].value, data.results[i].create_time, data.results[i].upload_time);
+      }
+    }, id);
+  }
 
   $("#sourceDropdown").append(newOption);
 }
@@ -165,4 +218,27 @@ function copySourceIDToClipboard() {
   $temp.val(text).select();
   document.execCommand("copy");
   $temp.remove();
+}
+
+function submitInsertSourceForm() {
+    var source_name = $("#insertSourceField").val();
+
+    function setFail(name, to) {
+      to ? $(name).attr("style", "border: 1px solid darkred") : $(name).removeAttr("style");
+      return to;
+    }
+
+    var failed = setFail("insertSourceField", source_name === "")
+
+    if(!failed) {
+      $("#insertSourceField").val("");
+
+      createSource(source_name, function(data, success) {
+        addSourceRow(data.source_id, data.source_name);
+      })
+    }
+}
+
+function submitUpdateSourceForm() {
+  //TODO: PUT request to source
 }

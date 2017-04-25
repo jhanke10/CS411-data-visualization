@@ -44,13 +44,19 @@ def predictive(request):
 	return render(request, "predictive/index.html", context={}, )
 
 def search(request):
-	serializer = DataSerializer(data=request.data)
-	if serializer.is_valid():
-		content = JSONRenderer().render(serializer.data)
-		stream = BytesIO(content)
-		data = JSONParser().parse(stream)
-		return Response(search_data(data))
-	return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+	# serializer = DataSerializer(data=json.loads(request.body))
+	# if serializer.is_valid():
+	# 	content = JSONRenderer().render(serializer.data)
+	# 	stream = BytesIO(content)
+	# 	data = JSONParser().parse(stream)
+	# 	return Response(search_data(data))
+	data = json.loads(request.body)
+	#print(data)
+	search = search_data(data)
+	#print(search)
+	return JsonResponse({"results": search})
+	#return JsonResponse({"result": "test"})
+	#return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 def search_data(data):
 	try:
@@ -72,9 +78,9 @@ def search_data(data):
 			time2 = int(values[time_range].split('-')[1])
 			values[time_range] = time1
 			values.insert(time_range + 1, time2)
-			data_points = Data.objects.raw(sql, values)
-			serializer = DataSerializer(data_points, many = True)
-			return serializer.data
+		data_points = Data.objects.raw(sql, values)
+		serializer = DataSerializer(data_points, many = True)
+		return serializer.data
 	except Data.DoesNotExist:
 		raise HTTP_404_NOT_FOUND
 
@@ -157,9 +163,15 @@ class SourceList(mixins.ListModelMixin,
 			content = JSONRenderer().render(serializer.data)
 			stream = BytesIO(content)
 			data = JSONParser().parse(stream)
+			newID = str(uuid.uuid4())
 			with connection.cursor() as cur:
-				cur.execute('INSERT INTO project_source (source_id, source_name) VALUES (%s, %s);', [str(uuid.uuid4()), str(data['source_name'])])
-			return Response(serializer.data, status=status.HTTP_201_CREATED)
+				cur.execute('INSERT INTO project_source (source_id, source_name) VALUES (%s, %s);', [newID, str(data['source_name'])])
+
+			newObject = {
+				"source_id": newID,
+				"source_name": str(data['source_name'])
+			}
+			return Response(newObject, status=status.HTTP_201_CREATED)
 		print(serializer.errors)
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
