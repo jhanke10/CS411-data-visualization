@@ -90,17 +90,14 @@ def dictfetchall(cursor):
     return [
         dict(zip(columns, row))
         for row in cursor.fetchall()
-    ]
+    ] 
 
 def compare(request):
 	data = json.loads(request.body)
-	try:
-		with connection.cursor() as cur:
-				cur.execute('SELECT create_time, ABS(value1-value2) AS difference FROM (SELECT data_id, value AS value1, create_time FROM project_data WHERE source_id = %s) NATURAL JOIN (SELECT data_id AS data_id2, value AS value2, create_time FROM project_data WHERE source_id = %s)', [data.values()[0], data.values()[1]])
-				data_points = dictfetchall(cur)
-				return JsonResponse({"data": data_points})
-	except Data.DoesNotExist:
-		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+	with connection.cursor() as cur:
+		cur.execute('SELECT create_time, ABS(value1-value2) AS difference FROM (SELECT data_id, value AS value1, create_time FROM project_data WHERE source_id = %s) NATURAL JOIN (SELECT data_id AS data_id2, value AS value2, create_time FROM project_data WHERE source_id = %s)', [data.values()[0], data.values()[1]])
+		data_points = dictfetchall(cur)
+		return JsonResponse({"data": data_points})
 
 def linearRegression(request):
 	if request.method == "GET":
