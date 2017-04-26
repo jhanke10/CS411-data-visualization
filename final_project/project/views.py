@@ -90,7 +90,7 @@ def dictfetchall(cursor):
     return [
         dict(zip(columns, row))
         for row in cursor.fetchall()
-    ] 
+    ]
 
 def compare(request):
 	data = json.loads(request.body)
@@ -149,6 +149,13 @@ def linearRegressionData(request):
 	x = data["x"]
 	y = data["y"]
 	k = data["k"]
+
+	#If length mismatch, then just take as much data as possible.
+	if(len(x) != len(y)):
+		length = min(len(x), len(y))
+		x = x[0:length]
+		y = y[0:length]
+
 	p = np.polyfit(x, y, k)
 	return JsonResponse({'coefficients': p.tolist()})
 
