@@ -84,16 +84,21 @@ def search_data(data):
 	except Data.DoesNotExist:
 		raise HTTP_404_NOT_FOUND
 
+def dictfetchall(cursor):
+    "Return all rows from a cursor as a dict"
+    columns = [col[0] for col in cursor.description]
+    return [
+        dict(zip(columns, row))
+        for row in cursor.fetchall()
+    ]
+
 def compare(request):
 	data = json.loads(request.body)
 	try:
-		#sql = 'SELECT table.create_time, ABS(table.value1 - table.value2) FROM ((SELECT * AS (data_id1, source_id1, category, value1, create_time, upload_time) FROM project_data WHERE source_id = %s) NATURAL JOIN (SELECT * AS (data_id2, source_id2, category, value2, create_time, upload_time) FROM project_data WHERE source_id = %s)) AS table GROUP BY table.create_time'
-		# sql = '''
-		# 	SELECT data_id, value AS value1, create_time FROM project_data WHERE source_id = %s;
-		# 	'''
-		data_points = Data.objects.raw('SELECT data_id FROM project_data WHERE source_id = %s;', [data.values()[0]])
-		serializer = DataSerializer(data_points, many = True)
-		return JsonResponse({"data": serializer.data})
+		with connection.cursor() as cur:
+				cur.execute('SELECT create_time, ABS(value1-value2) AS difference FROM (SELECT data_id, value AS value1, create_time FROM project_data WHERE source_id = %s) NATURAL JOIN (SELECT data_id AS data_id2, value AS value2, create_time FROM project_data WHERE source_id = %s)', [data.values()[0], data.values()[1]])
+				data_points = dictfetchall(cur)
+				return JsonResponse({"data": data_points})
 	except Data.DoesNotExist:
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -216,8 +221,9 @@ class SourceDetail(mixins.RetrieveModelMixin,
 		filteredObjects = self.get_object(pk)
 		try:
 			source = filteredObjects[0]
+			for data in Data.objects.raw('SELECT * FROM project_data WHERE source_id = %s', [source.source_id]):
+				data.deleteData()
 			source.deleteSource()
-			#TODO: when a source is deleted, delete all the data entries with the source_id
 			return Response(status=status.HTTP_204_NO_CONTENT)
 		except Exception as e:
 			return Response("What you tried to delete doesn't exist.", status=status.HTTP_404_NOT_FOUND)
