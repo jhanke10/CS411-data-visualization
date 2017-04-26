@@ -9,19 +9,19 @@ start = datetime.utcfromtimestamp(0)
 def time(time):
 	return (time - start).total_seconds() * 1000.0
 
-# class User(models.Model):
-# 	user_id = models.CharField(primary_key=True, default=uuid.uuid4, editable=False, max_length = 200)
-# 	username = models.CharField(max_length = 200)
-# 	password = models.CharField(max_length = 200)
-#
-# 	def deleteUser(self):
-# 		with connection.cursor() as cur:
-# 			cur.execute('DELETE FROM project_user WHERE user_id = %s;', [self.user_id])
+class User(models.Model):
+	user_id = models.CharField(primary_key=True, default=uuid.uuid4, editable=False, max_length = 200)
+	username = models.CharField(max_length = 200)
+	password = models.CharField(max_length = 200)
+
+	def deleteUser(self):
+		with connection.cursor() as cur:
+			cur.execute('DELETE FROM project_user WHERE user_id = %s;', [self.user_id])
 
 class Source(models.Model):
 	source_id = models.CharField(primary_key=True, default=uuid.uuid4, editable=False, max_length = 200)
 	source_name = models.CharField(max_length = 200, default = '')
-	# user = models.ForeignKey(User, on_delete=models.CASCADE)
+	# user_id = models.CharField(max_length = 50, editable = False)
 
 	def deleteSource(self):
 		with connection.cursor() as cur:

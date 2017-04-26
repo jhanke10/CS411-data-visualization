@@ -1,4 +1,4 @@
-from project.models import Data, Source
+from project.models import Data, Source, User
 from rest_framework import serializers
 
 class DataSerializer(serializers.HyperlinkedModelSerializer):
@@ -11,7 +11,7 @@ class SourceSerializer(serializers.HyperlinkedModelSerializer):
 		model = Source
 		fields = ('source_id', 'source_name')
 
-# class UserSerializer(serializers.HyperlinkedModelSerializer):
-# 	class Meta:
-# 		model = User
-# 		fields = ('user_id', 'username', 'password')
+class UserSerializer(serializers.HyperlinkedModelSerializer):
+	class Meta:
+		model = User
+		fields = ('user_id', 'username', 'password')

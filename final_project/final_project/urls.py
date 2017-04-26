@@ -32,6 +32,8 @@ urlpatterns = [
   url(r'^api/data/$', projectViews.DataList.as_view()),
   #url(r'^api/data/(?P<pk>[-\w]+)/$', projectViews.DataDetail.as_view()),
   url(r'^api/data/(?P<pk>.*)/$', projectViews.DataDetail.as_view()),
+  url(r'^api/user/$', projectViews.UserList.as_view()),
+  url(r'^api/user/(?P<pk>.*)/$', projectViews.UserDetail.as_view()),
   url(r'^api/source/$', projectViews.SourceList.as_view()),
   #url(r'^api/source/(?P<pk>[-\w ]+)/$', projectViews.SourceDetail.as_view()),
   url(r'^api/source/(?P<pk>.*)/$', projectViews.SourceDetail.as_view()),

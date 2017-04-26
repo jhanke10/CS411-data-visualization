@@ -1,8 +1,8 @@
 from django.http import HttpResponse
 from django.http import JsonResponse
 from django.shortcuts import render
-from project.models import Data, Source
-from .serializers import DataSerializer, SourceSerializer
+from project.models import Data, Source, User
+from .serializers import DataSerializer, SourceSerializer, UserSerializer
 from django.utils.six import BytesIO
 from datetime import datetime
 from django.db import connection
@@ -151,6 +151,78 @@ def linearRegressionData(request):
 	k = data["k"]
 	p = np.polyfit(x, y, k)
 	return JsonResponse({'coefficients': p.tolist()})
+
+class UserList(mixins.ListModelMixin,
+                  mixins.CreateModelMixin,
+                  generics.GenericAPIView):
+	queryset = Source.objects.raw('SELECT * FROM project_user')
+	serializer_class = UserSerializer
+
+	def get(self, request, format = None):
+		users = Source.objects.raw('SELECT * FROM project_user')
+		serializer = UserSerializer(users, many = True)
+		return Response(serializer.data)
+
+	def post(self, request, format = None):
+		serializer = UserSerializer(data=request.data)
+		if serializer.is_valid():
+			content = JSONRenderer().render(serializer.data)
+			stream = BytesIO(content)
+			data = JSONParser().parse(stream)
+			newID = str(uuid.uuid4())
+			with connection.cursor() as cur:
+				cur.execute('INSERT INTO project_source (user_id, username, password) VALUES (%s, %s, %s);', [newID, str(data['username']), str(data['password'])])
+			
+			newObject = {
+				"user_id": newID,
+				"username": str(data['username']),
+				"password": str(data['password'])
+			}
+			return Response(newObject, status=status.HTTP_201_CREATED)
+		print(serializer.errors)
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class UserDetail(mixins.RetrieveModelMixin,
+                    mixins.UpdateModelMixin,
+                    mixins.DestroyModelMixin,
+                    generics.GenericAPIView):
+	queryset = Source.objects.raw('SELECT * FROM project_user')
+	serializer_class = UserSerializer
+
+	def get_object(self, pk):
+		try:
+			return Source.objects.raw('SELECT * FROM project_user WHERE user_id = %s', [pk])
+		except Source.DoesNotExist:
+			raise HTTP_404_NOT_FOUND
+
+	def get(self, request, pk, format = None):
+		filteredObjects = self.get_object(pk)
+		try:
+			sources = filteredObjects[0]
+			serializer = UserSerializer(sources)
+			return Response(serializer.data)
+		except Exception as e:
+			return Response("Yo, you found something that don't exist, foo'", status=status.HTTP_404_NOT_FOUND)
+
+	def put(self, request, pk, format=None):
+		serializer = SourceSerializer(data = request.data)
+		if serializer.is_valid():
+			content = JSONRenderer().render(serializer.data)
+			stream = BytesIO(content)
+			data = JSONParser().parse(stream)
+			with connection.cursor() as cur:
+				cur.execute('UPDATE project_user SET username = %s, password = %s WHERE user_id = %s', [str(data['username']), str(data['password']), pk])
+			return Response(serializer.data)
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+	def delete(self, request, pk, format=None):
+		filteredObjects = self.get_object(pk)
+		try:
+			user = filteredObjects[0]
+			user.deleteUser()
+			return Response(status=status.HTTP_204_NO_CONTENT)
+		except Exception as e:
+			return Response("What you tried to delete doesn't exist.", status=status.HTTP_404_NOT_FOUND)
 
 class SourceList(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
