@@ -179,7 +179,7 @@ class UserList(mixins.ListModelMixin,
 			newID = str(uuid.uuid4())
 			with connection.cursor() as cur:
 				cur.execute('INSERT INTO project_source (user_id, username, password) VALUES (%s, %s, %s);', [newID, str(data['username']), str(data['password'])])
-			
+
 			newObject = {
 				"user_id": newID,
 				"username": str(data['username']),
@@ -230,6 +230,13 @@ class UserDetail(mixins.RetrieveModelMixin,
 			return Response(status=status.HTTP_204_NO_CONTENT)
 		except Exception as e:
 			return Response("What you tried to delete doesn't exist.", status=status.HTTP_404_NOT_FOUND)
+
+def interpolateData(request):
+	data = json.loads(request.body)
+	x = data["x"]
+	y = data["y"]
+	method = data["method"]
+	#cubic, quadratic, linear piecewise; lagrange; general polynomial
 
 class SourceList(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
