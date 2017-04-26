@@ -38,6 +38,7 @@ urlpatterns = [
   #url(r'^api/source/(?P<pk>[-\w ]+)/$', projectViews.SourceDetail.as_view()),
   url(r'^api/source/(?P<pk>.*)/$', projectViews.SourceDetail.as_view()),
   url(r'^api/search/$',projectViews.search),
+  url(r'^api/search_user/$',projectViews.search_user),
   url(r'^api/compare/$',projectViews.compare),
   url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
   url(r'^api/predict/linear/', projectViews.linearRegression),

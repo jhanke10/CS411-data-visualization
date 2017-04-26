@@ -92,6 +92,13 @@ def dictfetchall(cursor):
         for row in cursor.fetchall()
     ]
 
+def search_user(request):
+	data = json.loads(request.body)
+	with connection.cursor() as cur:
+		cur.execute('SELECT * FROM data_user WHERE username = %s AND password = %s', [str(data['username']), str(data['password'])])
+		user = dictfetchall(cur)
+		return JsonResponse({"user": user})
+
 def compare(request):
 	data = json.loads(request.body)
 	with connection.cursor() as cur:
