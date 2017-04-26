@@ -32,12 +32,12 @@ window.onload = function(e) {
     $("#insertSource").val("Source: " + name);
     $("#insertSource").attr("sourceID", source_id);
 
-    searchData(function(data) {
+    getDataBySource(source_id, function(data) {
       //console.log("Returned data: " + JSON.stringify(data));
       for(var i = 0; i < data.results.length; i++) {
         addDataRow(data.results[i].data_id, data.results[i].category, data.results[i].value, data.results[i].create_time, data.results[i].upload_time);
       }
-    }, source_id);
+    });
   });
 
   $("#searchFor").on("input", function(event) {
@@ -46,9 +46,10 @@ window.onload = function(e) {
 }
 
 function submitInsertForm() {
-  var type = $("#insertType").val();
+  var source = $("#insertSource").attr("sourceid");
+  var category = $("#insertCategory").val();
   var value = $("#insertValue").val();
-  var source = $("#insertSource").val();
+  var create_time = $("#insertTime").val();
 
   function setFail(name, to) {
     to ? $(name).attr("style", "border: 1px solid darkred") : $(name).removeAttr("style");
@@ -56,17 +57,25 @@ function submitInsertForm() {
   }
 
   var failed =
-    setFail("insertType", type === "") ||
+    setFail("insertSource", source === "") ||
+    setFail("insertType", category === "") ||
     setFail("insertValue", value === "" || isNaN(value)) ||
-    setFail("insertSource", source === "");
+    setFail("insertTime", create_time !== "" && isNaN(time));
 
   if(!failed) {
-    $("#insertType").val("");
-    $("#insertValue").val("");
-    $("#insertSource").val("");
+    if(create_time === "") {
+      create_time = new Date(Date.now()).getTime();
+    }
 
-    postData(type, value, source, function(data, success) {
-      addDataRow(type, value, source, time);
+    $("#insertCategory").val("");
+    $("#insertValue").val("");
+    $("#insertTime").val("");
+
+    //createData(source_id, category, value, create_time, whenDone)
+    //console.log(source);
+    createData(source, category, value, create_time, function(data, success) {
+      //console.log(JSON.stringify(data));
+      addDataRow(data.data_id, category, value, create_time, data.upload_time);
     })
   }
 }
@@ -74,20 +83,8 @@ function submitInsertForm() {
 //function addDataRow(type, value, source, time, prepend=true) {
 function addDataRow(id, category, value, createTime, uploadTime, prepend=true) {
 
-  function formatDate(date) {
-    var dateItself = date.toDateString();
-    dateItself = dateItself.substring(dateItself.indexOf(" ") + 1);
-
-    var hours = date.getHours();
-    var minutes = date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes();
-    var seconds = date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds();
-    var timeItself = hours + ":" + minutes + ":" + seconds;
-
-    return dateItself + " " + timeItself;
-  }
-
-  parsedCreateTime = formatDate(new Date(createTime));
-  parsedUploadTime = formatDate(new Date(uploadTime));
+  parsedCreateTime = millisToDate(createTime);
+  parsedUploadTime = millisToDate(uploadTime);
 
   //var html = $("<tr> <td>" + type + "</td> <td>" + value + "</td> <td>" + source + "</td> <td>" + parsedTime + "</td> </tr>")
   var html = $("<tr> <td>" + id + "</td> <td>" + category + "</td> <td>" + value + "</td> <td>" + parsedCreateTime + "</td> <td>" + parsedUploadTime + "</td> </tr>")
@@ -123,15 +120,32 @@ function addDataRow(id, category, value, createTime, uploadTime, prepend=true) {
           for(let i = 0; i < entries.length; i++) {
             var vl = $(entries[i]).val();
             if(vl === "") vl = $(entries[i]).attr("placeholder");
-            $(entries[i]).parent().replaceWith('<td>' + vl + '</td>');
+
+            if(i === entries.length - 1) {
+              var reg = /\D/;
+              if(reg.test(vl)) {
+                console.log("Value before: " + vl);
+                vl = dateToMillis(vl);
+                console.log("Value after: " + vl);
+              }
+            }
 
             data.push(vl);
+
+            if(i === entries.length - 1) {
+              console.log("Value before: " + vl);
+              vl = millisToDate(parseInt(vl));
+              console.log("Value after: " + vl);
+            }
+
+            $(entries[i]).parent().replaceWith('<td>' + vl + '</td>');
           }
 
           //TODO: CALL PUT() request
 
           //console.log(new Date(Date.parse(ref.find("td")[3].innerHTML)));
-          console.log(ref.find("td")[3].innerHTML);
+          //console.log(ref.find("td")[3].innerHTML);
+          console.log(ref.find("td")[0].innerHTML);
 
           /*
           putData(ref.find("td")[3].innerHTML, data[0], data[1], data[2], function(data, success) {
@@ -140,13 +154,22 @@ function addDataRow(id, category, value, createTime, uploadTime, prepend=true) {
           })
           */
 
+          console.log(data[0]);
+
+          //updateData(data_id, category, value, create_time, whenDone)
+          updateData(ref.find("td")[0].innerHTML, data[0], data[1], data[2], function(data, success) {
+            console.log("Put data with result: " + JSON.stringify(data));
+            console.log("Success value: " + success);
+
+          });
+
           $(document).off("click");
           ref.removeClass("editing");
         }
       });
 
       var entries = ref.find("td");
-      for(let i = 0; i < entries.length - 1; i++) {
+      for(let i = 1; i < entries.length - 1; i++) {
         var vl = entries[i].innerHTML;
         $(entries[i]).replaceWith('<td><input type="text" placeholder="' + vl + '"></td>');
       }
@@ -182,11 +205,13 @@ function deleteSelected() {
   var allRows = $("#realtimeDataTable tr");
   allRows.each(function(index, val) {
     if($(this).hasClass("highlight")) {
-      deleteData($(this).find("td")[3].val(), function(data, success) {
+      var ref = this;
+      deleteData($(this).find("td")[0].innerHTML, function(data, success) {
         console.log("delete returned data: " + JSON.stringify(data));
         console.log("delete returned success code: " + success);
-        $(this).hide();
-      });;
+        console.log($(this))
+        $(ref).remove();
+      });
     }
   });
 }
@@ -199,11 +224,11 @@ function addSourceRow(id, name) {
     $("#insertSource").attr("sourceID", id);
 
     clearData();
-    searchData(function(data) {
+    getDataBySource(id, function(data) {
       for(var i = 0; i < data.results.length; i++) {
         addDataRow(data.results[i].data_id, data.results[i].category, data.results[i].value, data.results[i].create_time, data.results[i].upload_time);
       }
-    }, id);
+    });
   }
 
   $("#sourceDropdown").append(newOption);

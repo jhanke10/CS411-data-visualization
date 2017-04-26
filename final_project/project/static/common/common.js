@@ -19,15 +19,52 @@ $.ajaxSetup({
 });
 // End setup for cookie management
 
-/**
- * TODO: add parameters for specifying what data to get
- * Async function that wraps a get request
- * @param  {function} whenDone A callback function called when the get request finishes
- */
-function getData(whenDone) {
+// General stuff
+function getMonth(mon){
+   var d = Date.parse(mon + " 1, 2012");
+   if(!isNaN(d)){
+      return new Date(d).getMonth();
+   }
+   return -1;
+ }
+
+ function dateToMillis(date) {
+ 	var date_string = date.split(" ");
+ 	var time_string = date_string[3].split(":");
+ 	var d = new Date(parseInt(date_string[2]), getMonth(date_string[0]), parseInt(date_string[1]), parseInt(time_string[0]), parseInt(time_string[1]), parseInt(time_string[2]));
+  console.log(parseInt(date_string[2]));
+  console.log(getMonth(date_string[0]));
+  console.log(parseInt(date_string[1]));
+  console.log(parseInt(time_string[0]));
+  console.log(parseInt(time_string[1]));
+  console.log(parseInt(time_string[2]));
+ 	return d.getTime();
+ }
+
+ function millisToDate(millis) {
+   date = new Date(0);
+   date.setUTCMilliseconds(millis);
+   var dateItself = date.toDateString();
+   dateItself = dateItself.substring(dateItself.indexOf(" ") + 1);
+
+   var hours = date.getHours();
+   var minutes = date.getMinutes() < 10 ? "0" + date.getMinutes() : date.getMinutes();
+   var seconds = date.getSeconds() < 10 ? "0" + date.getSeconds() : date.getSeconds();
+   var timeItself = hours + ":" + minutes + ":" + seconds;
+
+   return dateItself + " " + timeItself;
+ }
+
+
+////////////////////////////////////////////////////////////////////////////////
+/* Data API */
+////////////////////////////////////////////////////////////////////////////////
+
+//Get specific data
+function getData(data_id, whenDone) {
   $.ajax({
     type: "GET",
-    url: "/api/data/?format=json",
+    url: "/api/data/" + data_id + "/",
     dataType: "json",
     username: username,
     password: password,
@@ -35,46 +72,29 @@ function getData(whenDone) {
   });
 }
 
-/**
- * Gets all of the pages of data associated with a GET request. Upon every
- * page being recieved, calls "whenDone".
- * @param  {[type]} whenDone [description]
- * @return {[type]}          [description]
- */
-function getAllData(onUpdate, onComplete) {
-  getAllDataRecur("/api/?format=json", [], onUpdate, onComplete);
-}
+function getDataBySource(source_id, whenDone) {
+  var dat = JSON.stringify({"source_id": source_id});
 
-/**
- * Recursive call that gets all the pages of data. Don't call this directly,
- * instead use "getAllData".
- * @param  {String} nextURL  The url to call GET on
- * @param  {Array} dataAccumulater An array of elements collected so far
- * @param  {function} onUpdate A function called every time some more data is found
- * @param  {function} onComplete A function called when all data is found
- * @return {Array} An array of all the elements found
- */
-function getAllDataRecur(nextURL, dataAccumulater, onUpdate, onComplete) {
-  if(nextURL === null) {
-    if(typeof onComplete === "function") {
-      onComplete(dataAccumulater);
-    }
-  }
-
-  getNextData(nextURL, function(data, success) {
-    dataAccumulater = dataAccumulater.concat(data.results);
-    if(typeof onUpdate === "function") {
-      onUpdate(data, success);
-    }
-    getAllDataRecur(data.next, dataAccumulater, onUpdate, onComplete);
+  $.ajax({
+    type: "POST",
+    url: "/api/search/",
+    username: username,
+    password: password,
+    data: dat,
+    contentType: "application/json",
+    success: whenDone
   })
 }
 
-function getNextData(nextURL, whenDone) {
-  console.log("GET request to " + nextURL);
+/**
+ * TODO: add parameters for specifying what data to get
+ * Async function that wraps a get request
+ * @param  {function} whenDone A callback function called when the get request finishes
+ */
+function getAllData(whenDone) {
   $.ajax({
     type: "GET",
-    url: nextURL,
+    url: "/api/data/",
     dataType: "json",
     username: username,
     password: password,
@@ -84,19 +104,26 @@ function getNextData(nextURL, whenDone) {
 
 /**
  * Async function that wraps a post request
- * @param  {String} source_id ID of the source we're posting to
- * @param  {String} type   The category of the data
- * @param  {Integer} value  The value
- * @param  {String} time An ISO string representing the time uploaded
+ * Note that "source_id" and "upload_time" can't be changed.
+ * @param  {String}   source_id ID of the source we're posting to
+ * @param  {String}   category   The category of the data
+ * @param  {Integer}  value  The value
+ * @param  {String}   create_time A long representing millis since epoch
  * @param  {function} whenDone A callback function called when the post request finishes
  */
 function createData(source_id, category, value, create_time, whenDone) {
-  var dat = '{ "source_id": "' + source_id + '", "category": "' + category + '", "value": ' + value + ', "create_time": ' + create_time + ' }';
-  console.log("Trying to post data: '" + dat + "'");
+  var dat = JSON.stringify({
+    "source_id": source_id,
+    "category": category,
+    "value": value,
+    "create_time": create_time
+  });
+
+  console.log(dat);
 
   $.ajax({
     type: "POST",
-    url: "/api/data/?format=api",
+    url: "/api/data/",
     username: username,
     password: password,
     data: dat,
@@ -105,15 +132,17 @@ function createData(source_id, category, value, create_time, whenDone) {
   });
 }
 
-function updateData(data_id, category, value, whenDone) {
-  //Update the time to represent the value (TODO: CHANGE THIS TO USE ORIGINAL)
-  time = new Date(Date.now()).toISOString();
+function updateData(data_id, category, value, create_time, whenDone) {
+  var dat = JSON.stringify({
+    "data_id": data_id,
+    "category": category,
+    "value": value,
+    "create_time": create_time
+  })
 
   url = "/api/data/" + data_id + "/";
   console.log("Put to url: '" + url + "'")
 
-  //var dat = '{ "category": "' + type + '", "value": ' + value + ', "source": "' + source + '", "time": "' + time + '" }'
-  var dat = '{ "category": "' + category + '", "value": ' + value + ' }'
   console.log("Data: '" + dat + "'")
   $.ajax({
     type: "PUT",
@@ -126,10 +155,10 @@ function updateData(data_id, category, value, whenDone) {
   })
 }
 
-function deleteData(key, whenDone) {
+function deleteData(data_id, whenDone) {
   $.ajax({
     type: "DELETE",
-    url: "/api/data/" + key + "/",
+    url: "/api/data/" + data_id + "/",
     username: username,
     password: password,
     contentType: "application/json",
@@ -137,7 +166,7 @@ function deleteData(key, whenDone) {
   })
 }
 
-function searchData(whenDone, source_id, minTime, maxTime) {
+function searchData(source_id, minTime, maxTime, whenDone) {
   var dataObject = {"source_id": source_id};
   if(minTime && maxTime) {
     dataObject.time_range = minTime + "-" + maxTime;

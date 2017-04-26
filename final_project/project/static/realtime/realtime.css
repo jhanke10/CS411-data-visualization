@@ -2,8 +2,6 @@
   background-color: lightblue;
 }
 
-.scrollCell {
-  overflow:scroll;
-  white-space: nowrap;
-  display: block;
+td input {
+  width: 100%;
 }

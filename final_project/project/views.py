@@ -237,13 +237,22 @@ class DataList(mixins.ListModelMixin,
 			content = JSONRenderer().render(serializer.data)
 			stream = BytesIO(content)
 			data = JSONParser().parse(stream)
+			newID = str(uuid.uuid4())
+			timeNow = int(time(datetime.now()))
 			print(data)
-			print(str(uuid.uuid4()), str(data['source_id']), str(data['category']), int(data['value']), int(time(datetime.now())), int(data['create_time']))
+			print(newID, str(request.data['source_id']), str(data['category']), int(data['value']), timeNow, int(data['create_time']))
 			with connection.cursor() as cur:
-				cur.execute('INSERT INTO project_data (data_id, source_id, category, value, upload_time, create_time) VALUES (%s, %s, %s, %s, %s, %s);', [str(uuid.uuid4()), str(data['source_id']), str(data['category']), int(data['value']), int(time(datetime.now())), int(data['create_time']) ])
+				cur.execute('INSERT INTO project_data (data_id, source_id, category, value, upload_time, create_time) VALUES (%s, %s, %s, %s, %s, %s);', [newID, str(request.data['source_id']), str(data['category']), int(data['value']), timeNow, int(data['create_time']) ])
 				#cur.execute('INSERT INTO project_data (data_id, source_id, category, value, upload_time, create_time) VALUES (%s, %s, %s, %s, %s, %s);', [str(uuid.uuid4()), str(data['source_id']), str(data['category'])])
-
-			return Response(serializer.data, status=status.HTTP_201_CREATED)
+			newObj = {
+				"data_id": newID,
+				"source_id": request.data['source_id'],
+				"category": data['category'],
+				"value": data['value'],
+				"upload_time": timeNow,
+				"create_time": data['create_time']
+			}
+			return Response(newObj, status=status.HTTP_201_CREATED)
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class DataDetail(mixins.RetrieveModelMixin,
@@ -276,8 +285,9 @@ class DataDetail(mixins.RetrieveModelMixin,
 			stream = BytesIO(content)
 			data = JSONParser().parse(stream)
 			with connection.cursor() as cur:
-				cur.execute('UPDATE project_data SET category = %s, value = %d, create_time = %d WHERE data_id = %s', [str(data['category']), int(data['value']), int(data['create_time']), pk])
+				cur.execute('UPDATE project_data SET category = %s, value = %s, create_time = %s WHERE data_id = %s', [str(data['category']), int(data['value']), int(data['create_time']), pk])
 			return Response(serializer.data)
+		print(serializer.errors)
 		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 	def delete(self, request, pk, format=None):

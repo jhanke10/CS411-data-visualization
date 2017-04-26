@@ -29,7 +29,7 @@ class Source(models.Model):
 
 class Data(models.Model):
 	data_id = models.CharField(primary_key=True, default=uuid.uuid4, editable=False, max_length = 200)
-	source_id = models.CharField(max_length = 50)
+	source_id = models.CharField(max_length = 50, editable = False)
 	category = models.CharField(max_length = 200)
 	value = models.IntegerField(default = 0)
 	upload_time = models.IntegerField(default=time(datetime.now()), editable = False)
