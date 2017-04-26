@@ -150,11 +150,3 @@ function runLinearRegression() {
     myChart.update(0);
   });
 }
-
-
-
-function runCompare() {
-  postCompare(xSource, ySource, function(data) {
-    console.log(JSON.stringify(data));
-  })
-}

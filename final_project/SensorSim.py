@@ -1,4 +1,4 @@
-import requests, sys, random, threading, time
+import requests, sys, random, threading, time, math
 from datetime import datetime
 
 start = datetime.utcfromtimestamp(0)
@@ -12,11 +12,12 @@ def sendData(count):
     while counter != count:
 		timeNow = time(datetime.now())
 		print(timeNow)
+		#r = requests.post("http://sqlinjections.herokuapp.com/api/data/", data={
 		r = requests.post("http://localhost:8000/api/data/", data={
 			"category" : "SensorSim",
-			"source_id" : "e143fca3-bfd2-4416-b9cd-04663c362218",
-			"value" : counter * counter,
-			"create_time": int(time(datetime.now()))
+			"source_id" : "df9312a5-f32c-4132-bef7-72a877c397e4",
+			"value" : int(3 * math.sin(counter / 4.0)),
+			"create_time": counter #int(time(datetime.now()))
 			}, auth=("admin","password123"))
 		print("[request number " + str(counter) + "]: status= " + str(r.status_code))
 
@@ -24,9 +25,6 @@ def sendData(count):
 
         #next_call = next_call+1;
         #time.sleep(next_call - time.time())
-
-def test(x):
-	return x
 
 if __name__ == "__main__":
     count = -1

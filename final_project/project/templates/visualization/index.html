@@ -42,9 +42,15 @@
 			<div class="col-xs-9">
 				<h3 style="text-align: center;"> Data visualization </h3>
 
-				<label for="xAxis">Data table:</label>
+				<label for="dataSource">Data 1:</label>
 				<select class="form-control" id="dataSource">
 	      </select>
+
+				<label for="dataSource2">Data 2:</label>
+				<select class="form-control" id="dataSource2">
+				</select>
+
+				<button type="button" onclick="runCompare();" style="width:100%; margin-top: 5px;"> Run comparison </button>
 
 				<canvas id="dataVisChart" style="padding-top:15px; "></canvas>
 
