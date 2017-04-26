@@ -92,6 +92,13 @@ def dictfetchall(cursor):
         for row in cursor.fetchall()
     ]
 
+def search_user(request):
+	data = json.loads(request.body)
+	with connection.cursor() as cur:
+		cur.execute('SELECT * FROM data_user WHERE username = %s AND password = %s', [str(data['username']), str(data['password'])])
+		user = dictfetchall(cur)
+		return JsonResponse({"user": user})
+
 def compare(request):
 	data = json.loads(request.body)
 	with connection.cursor() as cur:
@@ -162,11 +169,11 @@ def linearRegressionData(request):
 class UserList(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
                   generics.GenericAPIView):
-	queryset = Source.objects.raw('SELECT * FROM project_user')
+	queryset = User.objects.raw('SELECT * FROM project_user')
 	serializer_class = UserSerializer
 
 	def get(self, request, format = None):
-		users = Source.objects.raw('SELECT * FROM project_user')
+		users = User.objects.raw('SELECT * FROM project_user')
 		serializer = UserSerializer(users, many = True)
 		return Response(serializer.data)
 
@@ -193,13 +200,13 @@ class UserDetail(mixins.RetrieveModelMixin,
                     mixins.UpdateModelMixin,
                     mixins.DestroyModelMixin,
                     generics.GenericAPIView):
-	queryset = Source.objects.raw('SELECT * FROM project_user')
+	queryset = User.objects.raw('SELECT * FROM project_user')
 	serializer_class = UserSerializer
 
 	def get_object(self, pk):
 		try:
-			return Source.objects.raw('SELECT * FROM project_user WHERE user_id = %s', [pk])
-		except Source.DoesNotExist:
+			return User.objects.raw('SELECT * FROM project_user WHERE user_id = %s', [pk])
+		except User.DoesNotExist:
 			raise HTTP_404_NOT_FOUND
 
 	def get(self, request, pk, format = None):
@@ -212,7 +219,7 @@ class UserDetail(mixins.RetrieveModelMixin,
 			return Response("Yo, you found something that don't exist, foo'", status=status.HTTP_404_NOT_FOUND)
 
 	def put(self, request, pk, format=None):
-		serializer = SourceSerializer(data = request.data)
+		serializer = UserSerializer(data = request.data)
 		if serializer.is_valid():
 			content = JSONRenderer().render(serializer.data)
 			stream = BytesIO(content)
