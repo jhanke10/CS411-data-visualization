@@ -278,6 +278,41 @@ function postLinear(source1, minTime1, maxTime1, source2, minTime2, maxTime2, k,
   })
 }
 
+function postLinearData(x, y, k, whenDone) {
+  var dat = JSON.stringify({
+    "x": x,
+    "y": y,
+    "k": k
+  });
+
+  $.ajax({
+    type: "POST",
+    url: "/api/predict/linearData/",
+    username: username,
+    password: password,
+    data: dat,
+    contentType: "application/json",
+    success: whenDone
+  });
+}
+
+function postCompare(source1, source2, whenDone) {
+  var dat = JSON.stringify({
+    "s1": source1,
+    "s2": source2
+  });
+
+  $.ajax({
+    type: "POST",
+    url: "/api/compare/",
+    username: username,
+    password: password,
+    data: dat,
+    contentType: "application/json",
+    success: whenDone
+  });
+}
+
 //
 
 //createSource("Testing3", function(data, err) { console.log(data); console.log(err); });

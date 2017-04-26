@@ -60,7 +60,7 @@ function submitInsertForm() {
     setFail("insertSource", source === "") ||
     setFail("insertType", category === "") ||
     setFail("insertValue", value === "" || isNaN(value)) ||
-    setFail("insertTime", create_time !== "" && isNaN(time));
+    setFail("insertTime", create_time !== "" && isNaN(create_time));
 
   if(!failed) {
     if(create_time === "") {
@@ -266,4 +266,12 @@ function submitInsertSourceForm() {
 
 function submitUpdateSourceForm() {
   //TODO: PUT request to source
+}
+
+function deleteSelectedSource() {
+  var source_id = $("#sourceDropdown").val();
+  source_id = source_id.substring(source_id.indexOf("=") + 1, source_id.indexOf(")"));
+  deleteSource(source_id, function() {
+   location.reload(); 
+  });
 }

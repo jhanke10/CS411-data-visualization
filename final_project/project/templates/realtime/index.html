@@ -47,8 +47,8 @@
 				<div class="row text-center" style="padding-top: 15px;">
 					<button class="btn btn-secondary" type="button" onclick="copySourceIDToClipboard();"> Copy ID to clipboard </button>
 					<button class="btn btn-success" type="button" onclick="$('#insertSourceForm').toggle('slow');"> Insert </button>
-					<button class="btn btn-info" type="button" onclick="$('#updateSourceForm').toggle('slow');"> Update </button>
-					<button class="btn btn-danger" type="button" onclick="deleteSelected();"> Delete </button>
+					<!-- <button class="btn btn-info" type="button" onclick="$('#updateSourceForm').toggle('slow');"> Update </button> -->
+					<button class="btn btn-danger" type="button" onclick="deleteSelectedSource();"> Delete </button>
 				</div>
 
 				<div id="insertSourceForm">
@@ -100,7 +100,7 @@
 					<label for="insertCategory"> Insert single entry </label>
 					<div class="row" style="margin: 0px;">
 						<div class="col-xs-3" style="padding: 0px;">
-						  <input type="text" id="insertSource" class="form-control" text="" disabled>
+						  <input type="text" id="insertSource" name="insertSource" class="form-control" text="" disabled>
 						</div>
 						<div class="col-xs-3" style="padding: 0px;">
 						  <input type="text" id="insertCategory" class="form-control" placeholder="Category" required="true">

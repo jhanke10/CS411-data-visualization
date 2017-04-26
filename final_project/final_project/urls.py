@@ -39,6 +39,7 @@ urlpatterns = [
   url(r'^api/compare/$',projectViews.compare),
   url(r'^api-auth/', include('rest_framework.urls', namespace='rest_framework')),
   url(r'^api/predict/linear/', projectViews.linearRegression),
+  url(r'^api/predict/linearData/', projectViews.linearRegressionData),
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

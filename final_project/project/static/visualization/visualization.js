@@ -1,92 +1,104 @@
+xData = [];
+xSource = null;
+yData = [];
+
+myChart = null;
+
 window.onload = function(e) {
 
-  getAllData(null, function(data) {
-    dataPoints = [];
-    times = [];
-    for(var i = 0; i < data.length; i++) {
-      dataPoints.push(data[i].value);
-
-      var date = new Date(data[i].time);
-
-      var dateStr = "";
-      if(date.getHours() > 12) {
-        var dateStr =
-          (date.getMonth() + 1) + "/" +
-          date.getDay() + "/" +
-          date.getFullYear() + " " +
-          (date.getHours() > 12 ? date.getHours() - 12 : date.getHours()) + ":" +
-          (date.getMinutes() < 9 ? "0" + date.getMinutes() : date.getMinutes()) +
-          (date.getHours() > 12 ? "pm" : "am");
+  setInterval(function() {
+    getDataBySource(xSource, function(dat) {
+      xData = [];
+      yData = [];
+      for(let i = 0; i < dat.results.length; i++) {
+        xData.push(dat.results[i].upload_time);
+        yData.push(dat.results[i].value);
       }
 
-      times.push(dateStr);
-    }
+      updateChart();
 
-    var myChart = new Chart($("#dataVisChart"), {
-        type: 'line',
-        data: {
-            labels: times,
-            datasets: [{
-                label: 'Temperature',
-                data: dataPoints
-                /*
-                backgroundColor: [
-                    'rgba(255, 99, 132, 0.2)',
-                    'rgba(54, 162, 235, 0.2)',
-                    'rgba(255, 206, 86, 0.2)',
-                    'rgba(75, 192, 192, 0.2)',
-                    'rgba(153, 102, 255, 0.2)',
-                    'rgba(255, 159, 64, 0.2)'
-                ],
-                borderColor: [
-                    'rgba(255,99,132,1)',
-                    'rgba(54, 162, 235, 1)',
-                    'rgba(255, 206, 86, 1)',
-                    'rgba(75, 192, 192, 1)',
-                    'rgba(153, 102, 255, 1)',
-                    'rgba(255, 159, 64, 1)'
-                ],
-                borderWidth: 1*/
-            }]
-        },
-        options: {
-            scales: {
-                yAxes: [{
-                    ticks: {
-                        beginAtZero:true
-                    }
-                }]
-            }
+    })
+  }, 200);
+
+  getAllSources(function(data) {
+    //console.log(JSON.stringify(data));
+
+    if(data.length > 0) {
+      xSource = data[0].source_id;
+      getDataBySource(xSource, function(dat) {
+        for(let i = 0; i < dat.results.length; i++) {
+          xData.push(dat.results[i].upload_time);
+          yData.push(dat.results[i].value);
         }
-    });
+        console.log("X data: " + xData);
+        console.log("Y data: " + yData);
 
-    function addData(time, value) {
-      myChart.data.labels.push(time);
-      myChart.data.datasets[0].data.push(value);
-      myChart.update(100);
+        var mergedData = [];
+        for(let i = 0; i < xData.length; i++) {
+          mergedData.push({"x": xData[i], "y": yData[i]});
+        }
+
+        myChart = new Chart($("#dataVisChart"), {
+            type: 'line',
+            data: {
+                label: "WIP",
+                datasets: [
+                  {
+                    label: 'Testing!',
+                    data: mergedData
+                  }
+                ]
+            },
+            options: {
+                scales: {
+                    xAxes: [{
+                      type: "linear",
+                      position: "bottom"
+                    }],
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero:false
+                        }
+                    }]
+                }
+            }
+        });
+      });
     }
 
-    /*
-    setInterval(function() {
-      var date = new Date(Date.now());
-
-      var dateStr = "";
-      if(date.getHours() > 12) {
-        var dateStr =
-          (date.getMonth() + 1) + "/" +
-          date.getDay() + "/" +
-          date.getFullYear() + " " +
-          (date.getHours() > 12 ? date.getHours() - 12 : date.getHours()) + ":" +
-          (date.getMinutes() < 9 ? "0" + date.getMinutes() : date.getMinutes()) +
-          (date.getHours() > 12 ? "pm" : "am");
-      }
-
-      addData(dateStr, Math.random() * 100);
-    }, 1000);*/
-
+    for(var i = 0; i < data.length; i++) {
+      addOption(data[i].source_id, data[i].source_name);
+    }
   });
+
 }
 
-function addOption(name) {
-  $("#options").append("<option>" + name + "</option>")
+function addOption(id, name) {
+  var newOption = document.createElement("option");
+  newOption.innerHTML = name + " (id=" + id + ")";
+  newOption.onclick = function() {
+    xData = [];
+    xSource = id;
+    getDataBySource(id, function(data) {
+      for(let i = 0; i < data.results.length; i++) {
+        xData.push(data.results[i].value);
+      }
+      updateChart();
+    });
+  }
+  $("#dataSource").append(newOption);
+}
+
+function updateChart() {
+  var mergedData = [];
+  for(let i = 0; i < xData.length; i++) {
+    mergedData.push({"x": xData[i], "y": yData[i]});
+  }
+
+  mergedData.sort(function(a,b) {
+    return a.x - b.x;
+  })
+
+  myChart.data.datasets[0].data = mergedData;
+  myChart.update(0);
 }

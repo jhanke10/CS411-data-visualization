@@ -85,21 +85,17 @@ def search_data(data):
 		raise HTTP_404_NOT_FOUND
 
 def compare(request):
-	serializer = DataSerializer(data=request.data)
-	if serializer.is_valid():
-		content = JSONRenderer().render(serializer.data)
-		stream = BytesIO(content)
-		data = JSONParser().parse(stream)
-		try:
-			keys = data.keys()
-			sql = 'SELECT table.time, table.value1 - table.value2 FROM (SELECT * AS (data_id1, source_id1, user_id, category, value1, time) FROM project_data WHERE source_id = %s) NATURAL JOIN (SELECT * AS (data_id2, source_id2, user_id, category, value2, time) FROM project_data WHERE source_id = %s) AS table GROUP BY table.time'
-			values = data.values()
-			data_points = Data.objects.raw(sql, values)
-			serializer = DataSerializer(data_points, many = True)
-			return Response(serializer.data)
-		except Data.DoesNotExist:
-			raise HTTP_404_NOT_FOUND
-	return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+	data = json.loads(request.body)
+	try:
+		#sql = 'SELECT table.create_time, ABS(table.value1 - table.value2) FROM ((SELECT * AS (data_id1, source_id1, category, value1, create_time, upload_time) FROM project_data WHERE source_id = %s) NATURAL JOIN (SELECT * AS (data_id2, source_id2, category, value2, create_time, upload_time) FROM project_data WHERE source_id = %s)) AS table GROUP BY table.create_time'
+		# sql = '''
+		# 	SELECT data_id, value AS value1, create_time FROM project_data WHERE source_id = %s;
+		# 	'''
+		data_points = Data.objects.raw('SELECT data_id FROM project_data WHERE source_id = %s;', [data.values()[0]])
+		serializer = DataSerializer(data_points, many = True)
+		return JsonResponse({"data": serializer.data})
+	except Data.DoesNotExist:
+		return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 def linearRegression(request):
 	if request.method == "GET":
@@ -145,6 +141,14 @@ def linearRegression(request):
 			return JsonResponse({'coefficients': p.tolist()})
 		except KeyError as e:
 			return Response(status=status.HTTP_400_BAD_REQUEST)
+
+def linearRegressionData(request):
+	data = json.loads(request.body)
+	x = data["x"]
+	y = data["y"]
+	k = data["k"]
+	p = np.polyfit(x, y, k)
+	return JsonResponse({'coefficients': p.tolist()})
 
 class SourceList(mixins.ListModelMixin,
                   mixins.CreateModelMixin,
